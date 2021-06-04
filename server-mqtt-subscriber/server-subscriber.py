@@ -61,7 +61,7 @@ def handle_acl_update(msg):
         if (msg.operation == OPERATION_ADD):
             acl_set.add(msg.mac_addr)
         elif (msg.operation == OPERATION_DELETE):
-            acl_set.DELETE(msg.mac_addr)
+            acl_set.remove(msg.mac_addr)
         
         # clear the file
         file.truncate(0)
