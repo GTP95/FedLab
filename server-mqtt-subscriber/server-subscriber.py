@@ -2,16 +2,19 @@ import paho.mqtt.client as mqtt
 import os
 import re
 
+OPERATION_ADD = 'A'
+OPERATION_DELETE = 'D'
+
 
 def is_valid_message(msg):
     words = msg.split()
     if len(words) != 2:
         return False
     
-    operation_regex = "^(A|D)"
+    operation_regex = "^(A|R)"
     operation_regex_obj = re.compile(operation_regex)
 
-    # Regex to check valid MAC address (courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/)
+    # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
     mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
              "{5}([0-9A-Fa-f]{2})")            
     mac_regex_obj = re.compile(mac_regex)
@@ -24,24 +27,45 @@ def is_valid_message(msg):
     return True
 
 
+# makes a set consisting of each line in file
+def construct_set_from_file(file):
+    output_set = set()
+    for line in file:
+        output_set.add(line.strip('\x00\n')) # strip null- and newline chars before adding
+    return output_set
+
+
+class Message:
+    def __init__(self, message):
+        if not is_valid_message(message):
+            raise RuntimeError("The message was not valid")
+        self.operation = message.split()[0]
+        self.mac_addr = message.split()[1]
+
+
 # reads the existing acl from the file, clears it, and then writes the new acl, 
 # which is the old acl with the specified operation applied to it
 # TODO: maybe make backup of old ACL in case something goes wrong while writing
 def handle_acl_update(msg):
-    decoded_msg = msg.payload.decode("utf-8")
-    if not is_valid_message(decoded_msg):
+    try: 
+        msg = Message(msg.payload.decode("utf-8"))
+    except RuntimeError as e:
+        print("Error: {}".format(e))
         return
 
     with open("acl.txt", 'r+') as file:
-        acl_set = set()
-        for line in file:
-            acl_set.add(line)
+        acl_set = construct_set_from_file(file)
+
+        # print(acl_set)
+    
+        if (msg.operation == OPERATION_ADD):
+            acl_set.add(msg.mac_addr)
+        elif (msg.operation == OPERATION_DELETE):
+            acl_set.DELETE(msg.mac_addr)
         
         # clear the file
         file.truncate(0)
-        
-        acl_set.add(decoded_msg)
-        
+
         file.write('\n'.join(acl_set))
 
 
