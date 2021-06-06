@@ -29,6 +29,7 @@ file_name="MAC_addresses.txt"
 touch $file_name
 
 IP_BROOKER="172.20.0.1"
+CURRENT_TIME=$(date +%s)
 
 MAC="$2"
 # If the mac uses - instead of : replace them
@@ -39,18 +40,18 @@ PARAM="-INVALID"
 SET=0
 
 # Determine if the first argument has been set correctly
-# TODO: Remove prints
+# TODO: Does MQTT also need the timestamp (probably not)
 if [ "$1" = '-add' ]
     then echo "Added"
     PARAM="-A"
 	# Add mac addresses to the file
-	echo "$NEW_MAC" >> $file_name
+	echo "$NEW_MAC $CURRENT_TIME" >> $file_name
     SET=1
 	mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROOKER"
 elif [ "$1" = '-remove' ]
     then echo "Removed"
     PARAM="-D"
-	# Remove mac address from the file
+	# Remove mac address and time from the file
 	sed -i "/$NEW_MAC/d" $file_name
     SET=1
 	mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROOKER"
@@ -59,7 +60,7 @@ else
     exit
 fi
 
-# TODO: Rules can now be dubble created if the user is not paying attention, this might not be an issue
+# TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
 # Create a rule such that OUT going packets are from a registered IoT device
 arptables $PARAM OUTPUT --source-mac $NEW_MAC -j ACCEPT
 # Create a rule such that IN going packets are going to a registered IoT device
