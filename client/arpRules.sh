@@ -35,6 +35,13 @@ MAC="$2"
 # If the mac uses - instead of : replace them
 NEW_MAC="${MAC//-/:}"
 
+if [[ $NEW_MAC =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
+	then echo "Correct"
+else
+	echo "MAC address is invalid"
+	exit
+fi
+
 # Standard  invalid param
 PARAM="-INVALID"
 SET=0
