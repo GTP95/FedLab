@@ -5,11 +5,6 @@ iptables -t mangle -F
 iptables -F
 iptables -X
 
-# Block All
-iptables -P OUTPUT DROP
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-
 # allow Localhost
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
@@ -19,8 +14,8 @@ iptables -A OUTPUT -d 255.255.255.255 -j ACCEPT
 iptables -A INPUT -s 255.255.255.255 -j ACCEPT
 
 # EDIT THE FOLLOWING TWO LINES. Make sure that you can communicate within your own network
-iptables -A INPUT -s **USE_LOCAL_NETWORK_IP_AND_SUBNET_MASK_IN_CIDR_NOTATION** -d **USE_LOCAL_NETWORK_IP_AND_SUBNET_MASK_IN_CIDR_NOTATION** -j ACCEPT
-iptables -A OUTPUT -s **USE_LOCAL_NETWORK_IP_AND_SUBNET_MASK_IN_CIDR_NOTATION** -d **USE_LOCAL_NETWORK_IP_AND_SUBNET_MASK_IN_CIDR_NOTATION** -j ACCEPT
+iptables -A INPUT -s NetworkIPAddressAndSubnetMaskInCIDRnotation -d NetworkIPAddressAndSubnetMaskInCIDRnotation -j ACCEPT
+iptables -A OUTPUT -s 192.168.1.0 -d NetworkIPAddressAndSubnetMaskInCIDRnotation -j ACCEPT
 
 # Allow established sessions to receive traffic:
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
@@ -37,13 +32,9 @@ iptables -I OUTPUT 1 -p udp --destination-port 1194 -m comment --comment "Allow 
 iptables -I OUTPUT 2 -p udp --destination-port 53 -m comment --comment "Allow DNS" -j ACCEPT
 
 # EDIT THE FOLLOWING LINE. Allow SSH from/to local network. Needed by Vagrant to provision VM
-iptables -A INPUT -p tcp -s **USE_LOCAL_NETWORK_IP_AND_SUBNET_MASK_IN_CIDR_NOTATION** --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp -s NetworkIPAddressAndSubnetMaskInCIDRnotation --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED -j ACCEPT
 
-# Block All
-iptables -A OUTPUT -j DROP
-iptables -A INPUT -j DROP
-iptables -A FORWARD -j DROP
 
 # Log all dropped packages, debug only.
 
