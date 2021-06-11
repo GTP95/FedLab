@@ -1,7 +1,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
   #Edit the next line with the IP you reserverd for the VM
-  config.vm.network "public_network", ip: "192.168.1.200"
+  config.vm.network "public_network", ip: "YOUR-IP-HERE"
   
   #Copy all the needed scripts inside the VM
   config.vm.provision "file", source: "iptables.sh", destination: "~/iptables.sh"
