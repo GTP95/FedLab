@@ -15,7 +15,7 @@ iptables -A INPUT -s 255.255.255.255 -j ACCEPT
 
 # EDIT THE FOLLOWING TWO LINES. Make sure that you can communicate within your own network
 iptables -A INPUT -s NetworkIPAddressAndSubnetMaskInCIDRnotation -d NetworkIPAddressAndSubnetMaskInCIDRnotation -j ACCEPT
-iptables -A OUTPUT -s 192.168.1.0 -d NetworkIPAddressAndSubnetMaskInCIDRnotation -j ACCEPT
+iptables -A OUTPUT -s NetworkIPAddressAndSubnetMaskInCIDRnotation -d NetworkIPAddressAndSubnetMaskInCIDRnotation -j ACCEPT
 
 # Allow established sessions to receive traffic:
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
