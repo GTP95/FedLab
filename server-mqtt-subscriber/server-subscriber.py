@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 import os
 import re
-import sys
+import argparse
 
 OPERATION_ADD = 'A'
 OPERATION_DELETE = 'D'
@@ -19,7 +19,7 @@ class Message:
         if len(words) != 2:
             return False
         
-        operation_regex = "^(A|R)"
+        operation_regex = "^(A|D)"
         operation_regex_obj = re.compile(operation_regex)
 
         # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
@@ -42,12 +42,10 @@ class MQTT_ACL_manager:
         client.on_connect = self.on_connect
         client.on_message = self.on_message
 
-        client.connect(args[0], int(args[1]), 60)
+        client.connect(args.server, args.port, 60)
 
-        # Blocking call that processes network traffic, dispatches callbacks and
-        # handles reconnecting.
-        # Other loop*() functions are available that give a threaded interface and a
-        # manual interface.
+        # blocking call that keeps the client running by handling network traffic,
+        # dispatching callbacks and reconnecting in case of disconnects
         client.loop_forever()
 
     # reads the existing acl from the file, clears it, and then writes the new acl, 
@@ -60,36 +58,36 @@ class MQTT_ACL_manager:
             print("Error: {}".format(e))
             return
 
-        with open("acl.txt", 'r+') as file:
+        acl_set = set()
+        with open("acl.txt", 'r') as file:
             acl_set = self.construct_set_from_file(file)
 
-            print(acl_set)
-        
-            if (msg.operation == OPERATION_ADD):
-                acl_set.add(msg.mac_addr)
-            elif (msg.operation == OPERATION_DELETE):
-                acl_set.remove(msg.mac_addr)
-            
+        if (msg.operation == OPERATION_ADD):
+            acl_set.add(msg.mac_addr)
+        elif (msg.operation == OPERATION_DELETE):
+            acl_set.discard(msg.mac_addr)
+
+        with open("acl.txt", 'w') as file:
             # clear the file
             file.truncate(0)
 
             file.write('\n'.join(acl_set))
 
-    # The callback for when the client receives a CONNACK response from the server.
+    # called when a CONNACK is received from the server, i.e. when a connection has been established
     def on_connect(self, client, userdata, flags, rc, fifth_argument):
         if rc==0:
             print("Connected successfully")
         else:
             print("Connection attempt failed")
 
-        # Subscribing in on_connect() means that if we lose the connection and
-        # reconnect then subscriptions will be renewed.
-        # client.subscribe("$SYS/#")
+        # by subscribing in on_connect(), we make sure that the subscription is
+        # renewed when reconnected after a disconnect
         client.subscribe("aclUpdate")
 
-    # The callback for when a PUBLISH message is received from the server.
+    # called when a relevant PUB message is received from the broker
     def on_message(self, client, userdata, msg):
-        print(msg.topic+" "+str(msg.payload))
+        # print(msg.topic+" "+str(msg.payload))
+        # as long as the client only has the aclUpdate subscription, this check is redundant
         if msg.topic == "aclUpdate":
             self.handle_acl_update(msg)
 
@@ -102,7 +100,15 @@ class MQTT_ACL_manager:
 
 
 if __name__ == "__main__":
-    # TODO make a somewhat robust cli argument system
-    if len(sys.argv) != 3:
-        raise RuntimeError("Invalid number of arguments: please use ...")
-    MQTT_ACL_manager(sys.argv[1:])
+    parser = argparse.ArgumentParser(description="MQTT subscriber for the INTERSCT Federated Lab server")
+
+    parser.add_argument("-s", "--server", nargs=1, metavar="server_identifier", type=str, default="localhost",
+        help="The identifier for the device on which the MQTT broker runs.\
+            This may be a hostname (e.g. localhost), URL or IP address")
+
+    parser.add_argument("-p", "--port", nargs=1, metavar="broker_port", type=int, default=1883,
+        help="The port used by the MQTT broker")
+
+    args = parser.parse_args()
+
+    MQTT_ACL_manager(args)
