@@ -14,13 +14,17 @@ TTL = 5*24*60*60
 
 class arp_change_handler(FileSystemEventHandler):
     def on_modified(self, event):
+        print("The arp table was altered")
+
         if event.is_directory:
             return
+
+        print("The arp table was altered")
 
         mac_list = []
         current_time = math.floor(time.time())
 
-        with open('home/maxm/Documents/seminar/dummy.txt', 'r') as file:
+        with open('/proc/net/arp', 'r') as file:
             for line in file:
                 for word in line.split():
                     # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
@@ -33,12 +37,16 @@ class arp_change_handler(FileSystemEventHandler):
 
 
         new_mac_addr_list = []
-        with open("home/maxm/Documents/seminar/MAC_addresses.txt", 'r') as file:
-            # copy all entries from arp table
-            for mac in mac_list:
-                # print("copying from mac_list: {}".format(mac))
-                new_mac_addr_list.append("{} {}".format(mac, current_time))
 
+        # copy all entries from arp table
+        for mac in mac_list:
+            # print("copying from mac_list: {}".format(mac))
+            new_mac_addr_list.append("{} {}".format(mac, current_time))
+
+        if not os.path.exists("MAC_addresses"):
+            open("MAC_addresses", 'w').close()
+
+        with open("MAC_addresses", 'r') as file:
             # check for validity of remaining entries
             for line in file:
                 if len(line.split()) == 0:
@@ -59,18 +67,21 @@ class arp_change_handler(FileSystemEventHandler):
             print(repr(new_mac_addr_list[0]))
 
 
-        with open("home/maxm/Documents/seminar/MAC_addresses.txt", 'w') as file:
+        with open("MAC_addresses", 'w') as file:
             file.write('\n'.join(new_mac_addr_list))
 
 
 if __name__ == "__main__":
-    os.chdir('/')
+    path, _ = os.path.split(os.path.realpath(__file__))
+
+    os.chdir(path)
 
     observer = Observer()
-    observer.schedule(arp_change_handler(), path=sys.argv[1], recursive=False)
+    observer.schedule(arp_change_handler(), path="/proc/net/arp", recursive=False) # monitoring /proc/net/arp does not work!
     observer.start()
     try:
         while True:
+            # keep alive
             time.sleep(1)
         else:
             print("got it")
