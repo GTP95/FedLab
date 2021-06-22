@@ -25,7 +25,7 @@ fi
 # Generate a text file in which the mac addresses will be stored
 # This file will be used for MQTT
 # Might even be used to set rules on reboot if there is no other way
-file_name="MAC_addresses.txt"
+file_name="MAC_addresses"
 touch $file_name
 
 IP_BROOKER="172.20.0.1"
