@@ -1,7 +1,5 @@
 import time
-import sys
 import os
-import logging
 import time
 import re
 from watchdog.observers import Observer
