@@ -38,6 +38,8 @@ class arp_change_handler(FileSystemEventHandler):
         if event.is_directory:
             return
 
+        init_files_if_not_exists()
+
         current_time = math.floor(time.time())
 
         # store the MAC addresses in the ARP table in a list
@@ -84,7 +86,7 @@ class arp_change_handler(FileSystemEventHandler):
             file.write('\n'.join(new_mac_addr_list) + suffix)
 
 
-def init_files():
+def init_files_if_not_exists():
     if not os.path.exists("arp_table"):
         open("/tmp/arp_table", 'w').close()
 
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     path, _ = os.path.split(os.path.realpath(__file__))
     os.chdir(path)
 
-    init_files()
+    init_files_if_not_exists()
 
     observer = Observer()
     observer.schedule(arp_change_handler(), path="/tmp/arp_table", recursive=False) # monitoring /proc/net/arp does not work!
