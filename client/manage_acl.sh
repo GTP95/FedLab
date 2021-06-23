@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# To run: sudo arp_rules.sh -add/remove mac_address
+# To run: sudo manage_acl.sh add/remove mac_address
 
 #TODO: Check if the arptables rules are persistent between sessions/reboots
 
@@ -13,7 +13,7 @@
 # arptables -P OUTPUT DROP (Can also be set to accept and just cancel specific requests)
 # TODO: Not sure if we can still ssh into it if we set these rules
 
-# Argument 1: -add/-remove to add/remove a rule
+# Argument 1: 'add'/'remove' to add/remove a rule
 # Argument 2: the mac address, can be both with - or :
 
 # Script has to be run as sudo to modify arptables
@@ -48,14 +48,14 @@ SET=0
 
 # Determine if the first argument has been set correctly
 # TODO: Does MQTT also need the timestamp (probably not)
-if [ "$1" = '-add' ]
+if [ "$1" = 'add' ]
     then echo "Added"
     PARAM="-A"
 	# Add mac addresses to the file
 	echo "$NEW_MAC $CURRENT_TIME" >> $file_name
     SET=1
 	mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROOKER"
-elif [ "$1" = '-remove' ]
+elif [ "$1" = 'remove' ]
     then echo "Removed"
     PARAM="-D"
 	# Remove mac address and time from the file
@@ -63,7 +63,7 @@ elif [ "$1" = '-remove' ]
     SET=1
 	mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROOKER"
 else
-	echo "Please use -remove or -add after ipRules"
+	echo "Please use 'remove' or 'add' after ipRules"
     exit
 fi
 

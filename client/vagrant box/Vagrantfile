@@ -13,9 +13,9 @@ Vagrant.configure("2") do |config|
   
   #Copy all the needed scripts inside the VM
   config.vm.provision "file", source: "iptables.sh", destination: "~/iptables.sh"
-  config.vm.provision "file", source: "../client/arpRules.sh", destination: "~/arpRules.sh"
-  config.vm.provision "file", source: "../client/arp_watchdog.py", destination: "~/arp_watchdog.py"
-  config.vm.provision "file", source: "../client/init.sh", destination: "~/init.sh"
+  config.vm.provision "file", source: "../manage_acl.sh", destination: "~/manage_acl.sh"
+  config.vm.provision "file", source: "../arp_table_observer.py", destination: "~/arp_table_observer.py"
+  config.vm.provision "file", source: "../init.sh", destination: "~/init.sh"
   config.vm.provision "file", source: CERT, destination: "~/#{CERT}"
   
   #Update VM, install OpenVPN and dos2unix
