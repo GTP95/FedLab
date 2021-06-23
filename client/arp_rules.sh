@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# To run: sudo arpRules.sh -add/remove mac_address
+# To run: sudo arp_rules.sh -add/remove mac_address
 
 #TODO: Check if the arptables rules are persistent between sessions/reboots
 
