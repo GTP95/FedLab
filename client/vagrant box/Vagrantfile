@@ -18,9 +18,13 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "../init.sh", destination: "~/init.sh"
   config.vm.provision "file", source: CERT, destination: "~/#{CERT}"
   
-  #Update VM, install OpenVPN and dos2unix
-  config.vm.provision"shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
-  config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix"
+  #Update VM, install OpenVPN, dos2unix, pip and scripts' dependencies
+  config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
+  config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip"
+  config.vm.provision "shell", inline: "pip install watchdog"
+  config.vm.provision "shell", inline: "wget https://github.com/hivemq/mqtt-cli/releases/download/v4.6.2/mqtt-cli-4.6.2.deb"
+  config.vm.provision "shell", inline: "sudo apt install ./mqtt-cli-4.6.2.deb"
+  config.vm.provision "shell", inline: "rm mqtt-cli-4.6.2.deb"
   
   #Fix CRLF in case host is running Windows
   config.vm.provision "shell", inline: "dos2unix iptables.sh"
@@ -29,13 +33,19 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "dos2unix init.sh"
   config.vm.provision "shell", inline: "dos2unix #{CERT}"
  
+  #enable traffic forwarding
   config.vm.provision "shell", inline: "echo enabling traffic forwarding"
   config.vm.provision "shell", inline: "echo 1 > /proc/sys/net/ipv4/ip_forward", run: 'always'
-
+  
+  #make sure the garbage collector for the ARP table runs when we want it to
+  config.vm.provision "shell", inline "echo 1 > /proc/sys/net/ipv4/neigh/default/gc_thresh1", run: 'always'
+  
+  #Configure iptables
   config.vm.provision "shell", inline: "echo configuring iptables"
   config.vm.provision "shell", inline: "sudo bash iptables.sh", run: 'always'
   
+  #Start OpenVPN and arp_table_observer.py
   config.vm.provision "shell", inline: "echo starting OpenVPN"
-  #In next line, substitute "certificate.ovpn" with the name of your OpenVPN certificate	
   config.vm.provision :shell, inline: "sudo openvpn --config #{CERT}", run: 'always'
+  config.vm.provision :shell, inline: "python3 arp_table_observer.py"
 end
