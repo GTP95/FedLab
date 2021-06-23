@@ -41,7 +41,7 @@ class MQTT_ACL_manager:
         client.on_connect = self.on_connect
         client.on_message = self.on_message
 
-        client.connect(args.server[0], args.port[0], 60)
+        client.connect(args.server, args.port, 60)
 
         # blocking call that keeps the client running by handling network traffic,
         # dispatching callbacks and reconnecting in case of disconnects
@@ -113,11 +113,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="MQTT subscriber for the INTERSCT Federated Lab server")
 
-    parser.add_argument("-s", "--server", nargs=1, metavar="server_identifier", type=str, default=["localhost"],
+    parser.add_argument("-s", "--server", metavar="server_identifier", type=str, default="localhost",
         help="The identifier for the device on which the MQTT broker runs.\
             This may be a hostname, URL or IP address (defaults to localhost)")
 
-    parser.add_argument("-p", "--port", nargs=1, metavar="broker_port", type=int, default=[1883],
+    parser.add_argument("-p", "--port", metavar="broker_port", type=int, default=1883,
         help="The port used by the MQTT broker (defaults to 1883)")
 
     args = parser.parse_args()
