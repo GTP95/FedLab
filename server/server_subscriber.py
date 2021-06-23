@@ -37,7 +37,6 @@ class Message:
 
 class MQTT_ACL_manager:
     def __init__(self, args):
-        os.chdir("/home/maxm/Documents/seminar/server-mqtt-subscriber")
         client = mqtt.Client(protocol=mqtt.MQTTv5)
         client.on_connect = self.on_connect
         client.on_message = self.on_message
@@ -52,6 +51,8 @@ class MQTT_ACL_manager:
     # which is the old acl with the specified operation applied to it
     # TODO: maybe make backup of old ACL in case something goes wrong while writing
     def handle_acl_update(self, msg):
+        init_file_if_not_exists()
+
         try: 
             msg = Message(msg.payload.decode("utf-8"))
         except RuntimeError as e:
@@ -59,7 +60,7 @@ class MQTT_ACL_manager:
             return
 
         acl_set = set()
-        with open("acl.txt", 'r') as file:
+        with open("device_directory", 'r') as file:
             acl_set = self.construct_set_from_file(file)
 
         if (msg.operation == OPERATION_ADD):
@@ -67,7 +68,7 @@ class MQTT_ACL_manager:
         elif (msg.operation == OPERATION_DELETE):
             acl_set.discard(msg.mac_addr)
 
-        with open("acl.txt", 'w') as file:
+        with open("device_directory", 'w') as file:
             # clear the file
             file.truncate(0)
 
@@ -99,15 +100,25 @@ class MQTT_ACL_manager:
         return output_set
 
 
+def init_file_if_not_exists():
+    if not os.path.exists("device_directory"):
+        open("device_directory", 'w').close()
+
+
 if __name__ == "__main__":
+    path, _ = os.path.split(os.path.realpath(__file__))
+    os.chdir(path)
+
+    init_file_if_not_exists()
+
     parser = argparse.ArgumentParser(description="MQTT subscriber for the INTERSCT Federated Lab server")
 
     parser.add_argument("-s", "--server", nargs=1, metavar="server_identifier", type=str, default="localhost",
         help="The identifier for the device on which the MQTT broker runs.\
-            This may be a hostname (e.g. localhost), URL or IP address")
+            This may be a hostname, URL or IP address (defaults to localhost)")
 
     parser.add_argument("-p", "--port", nargs=1, metavar="broker_port", type=int, default=1883,
-        help="The port used by the MQTT broker")
+        help="The port used by the MQTT broker (defaults to 1883)")
 
     args = parser.parse_args()
 
