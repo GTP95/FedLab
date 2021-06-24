@@ -4,7 +4,7 @@
 VM_IP="192.168.1.201"
 
 #In next line, substitute "certificate.ovpn" with the name of your OpenVPN certificate
-CERT="certificate.ovpn"
+CERT="max.ovpn"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
   #Fix CRLF in case host is running Windows
   config.vm.provision "shell", inline: "dos2unix iptables.sh"
   config.vm.provision "shell", inline: "dos2unix manage_acl.sh"
-  config.vm.provision "shell", inline: "dos2unix arp_watchdog.py"
+  config.vm.provision "shell", inline: "dos2unix arp_table_observer.py"
   config.vm.provision "shell", inline: "dos2unix init.sh"
   config.vm.provision "shell", inline: "dos2unix #{CERT}"
  
