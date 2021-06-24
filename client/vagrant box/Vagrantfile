@@ -4,7 +4,7 @@
 VM_IP="192.168.1.201"
 
 #In next line, substitute "certificate.ovpn" with the name of your OpenVPN certificate
-CERT="max.ovpn"
+CERT="certificate.ovpn"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
@@ -45,8 +45,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo bash iptables.sh", run: 'always'
   
   #Start OpenVPN, init.sh and arp_table_observer.py
-  config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'
-  config.vm.provision "shell", inline: "echo starting OpenVPN"
+  #config.vm.provision "shell", inline: "echo running init.sh script", run: 'always'
+  #config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'
+  config.vm.provision "shell", inline: "echo starting OpenVPN", run: 'always'
   config.vm.provision :shell, inline: "sudo openvpn --config #{CERT}", run: 'always'
+  config.vm.provision "shell", inline: "echo starting arp_table_observer.py", run: 'always'
   config.vm.provision :shell, inline: "python3 arp_table_observer.py", run: 'always'
 end
