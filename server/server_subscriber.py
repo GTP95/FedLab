@@ -7,10 +7,65 @@ OPERATION_ADD = 'A'
 OPERATION_DELETE = 'D'
 
 
-class Message:
+class DeviceDirectoryEntry:
+    def __init__(self, mac_addr, status):
+        if not self.is_valid_update(mac_addr, status):
+            raise RuntimeError("Invalid device directory update")
+        self.mac_addr, self.status = mac_addr, status
+
+    def __str__(self):
+        return "{} {}".format(self.mac_addr, self.status)
+
+    @classmethod
+    def from_str(cls, entry: str) -> 'Book':
+        if not DeviceDirectoryEntry.is_valid_entry(entry):
+            raise RuntimeError("Malformed line detected in device_directory")
+        words = entry.split()
+        return cls(mac_addr=words[0], status = words[1])
+
+    @staticmethod
+    def is_valid_entry(line):
+        words = line.split()
+        if len(words) != 2:
+            return False
+
+        # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
+        mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
+                "{5}([0-9A-Fa-f]{2})")            
+        mac_regex_obj = re.compile(mac_regex)
+
+        status_regex = "^(online|offline)$"
+        status_regex_obj = re.compile(status_regex)
+
+        if not re.search(mac_regex_obj, words[0]):
+            return False
+        if not re.search(status_regex_obj, words[1]):
+            return False
+
+        return True
+
+    @staticmethod
+    def is_valid_update(mac_addr, status):
+        # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
+        mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
+                "{5}([0-9A-Fa-f]{2})")            
+        mac_regex_obj = re.compile(mac_regex)
+
+        status_regex = "^(online|offline)$"
+        status_regex_obj = re.compile(status_regex)
+
+        if not re.search(mac_regex_obj, mac_addr):
+            return False
+        if not re.search(status_regex_obj, status):
+            return False
+
+        return True
+
+
+class AddRemoveMessage:
     def __init__(self, message):
         if not self.is_valid_message(message):
-            raise RuntimeError("The message was not valid")
+            raise RuntimeError("The add/remove message was not valid")
         self.operation, self.mac_addr = message.split()
 
     @staticmethod
@@ -35,7 +90,35 @@ class Message:
         return True
 
 
-class MQTT_ACL_manager:
+class DeviceStatusMessage:
+    def __init__(self, message):
+        if not self.is_valid_message(message):
+            raise RuntimeError("The device status message was not valid")
+        self.mac_addr, self.status = message.split()
+
+    @staticmethod
+    def is_valid_message(msg):
+        words = msg.split()
+        if len(words) != 2:
+            return False
+
+        # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
+        mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
+                "{5}([0-9A-Fa-f]{2})")            
+        mac_regex_obj = re.compile(mac_regex)
+
+        status_regex = "^(online|offline)$"
+        status_regex_obj = re.compile(status_regex)
+
+        if not re.search(mac_regex_obj, words[0]):
+            return False
+        if not re.search(status_regex_obj, words[1]):
+            return False
+
+        return True
+
+
+class MqttAclManager:
     def __init__(self, args):
         client = mqtt.Client(protocol=mqtt.MQTTv5)
         client.on_connect = self.on_connect
@@ -54,25 +137,50 @@ class MQTT_ACL_manager:
         init_file_if_not_exists()
 
         try: 
-            msg = Message(msg.payload.decode("utf-8"))
+            msg = AddRemoveMessage(msg.payload.decode("utf-8"))
         except RuntimeError as e:
             print("Error: {}".format(e))
             return
 
-        acl_set = set()
+        device_directory = dict[str, DeviceDirectoryEntry]()
         with open("device_directory", 'r') as file:
-            acl_set = self.construct_set_from_file(file)
+            device_directory = self.construct_dict_from_file(file)
 
         if (msg.operation == OPERATION_ADD):
-            acl_set.add(msg.mac_addr)
+            device_directory[msg.mac_addr] = DeviceDirectoryEntry(msg.mac_addr, "offline")
         elif (msg.operation == OPERATION_DELETE):
-            acl_set.discard(msg.mac_addr)
+            del device_directory[msg.mac_addr]
 
+        suffix = '\n' if len(device_directory) > 0 else ''
         with open("device_directory", 'w') as file:
-            # clear the file
-            file.truncate(0)
+            file.write('\n'.join(map(lambda x: str(x), device_directory.values())) + suffix)
 
-            file.write('\n'.join(acl_set))
+
+    def handle_device_status_update(self, msg):
+        init_file_if_not_exists()
+
+        try: 
+            msg = DeviceStatusMessage(msg.payload.decode("utf-8"))
+        except RuntimeError as e:
+            print("Error: {}".format(e))
+            return
+
+        device_directory = dict[str, DeviceDirectoryEntry]()
+        with open("device_directory", 'r') as file:
+            device_directory = self.construct_dict_from_file(file)
+
+        if msg.mac_addr not in device_directory:
+            print("Error: There was an error indexing the device")
+            return
+
+        if (msg.status == "online"):
+            device_directory[msg.mac_addr].status = "online"
+        elif (msg.status == "offline"):
+            device_directory[msg.mac_addr].status = "offline"
+
+        suffix = '\n' if len(device_directory) > 0 else ''
+        with open("device_directory", 'w') as file:
+            file.write('\n'.join(map(lambda x: str(x), device_directory.values())) + suffix)
 
     # called when a CONNACK is received from the server, i.e. when a connection has been established
     def on_connect(self, client, userdata, flags, rc, fifth_argument):
@@ -84,20 +192,28 @@ class MQTT_ACL_manager:
         # by subscribing in on_connect(), we make sure that the subscription is
         # renewed when reconnected after a disconnect
         client.subscribe("aclUpdate")
+        client.subscribe("device_status_update")
 
     # called when a relevant PUB message is received from the broker
     def on_message(self, client, userdata, msg):
-        # print(msg.topic+" "+str(msg.payload))
-        # as long as the client only has the aclUpdate subscription, this check is redundant
         if msg.topic == "aclUpdate":
             self.handle_acl_update(msg)
 
+        if msg.topic == "device_status_update":
+            self.handle_device_status_update(msg)
+
     # makes a set consisting of each line in file
-    def construct_set_from_file(self, file):
-        output_set = set()
+    def construct_dict_from_file(self, file):
+        output_dict = dict[str, DeviceDirectoryEntry]()
+
         for line in file:
-            output_set.add(line.strip('\x00\n')) # strip null- and newline chars before adding
-        return output_set
+            try: 
+                entry = DeviceDirectoryEntry.from_str(line.strip('\n'))
+                output_dict[entry.mac_addr] = entry
+            except RuntimeError as e:
+                print("Error: {}".format(e))
+
+        return output_dict
 
 
 def init_file_if_not_exists():
@@ -122,4 +238,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    MQTT_ACL_manager(args)
+    MqttAclManager(args)
