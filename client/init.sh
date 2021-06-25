@@ -9,9 +9,9 @@ fi
 # Fill in the router's mac address
 ROUTER="6B:9C:8A:24:A5:7B"
 
-# Could also include a port number if neccessary
-# Fill in the mac address of the machine that runs Vagrant
-VAGRANT="14:33:f3:0d:eb:03"
+# Vagrant static mac addresses
+VAGRANT_LOCAL="52:54:00:12:35:02"
+VAGRANT_OUTSIDE="52:54:00:12:35:03"
 
 
 # Allow the router to send packets
@@ -19,8 +19,10 @@ arptables -A OUTPUT --source-mac $ROUTER -j ACCEPT
 arptables -A INPUT --destination-mac $ROUTER -j ACCEPT
 
 # Allow ssh for Vagrant
-arptables -A OUTPUT --source-mac $VAGRANT -j ACCEPT
-arptables -A INPUT --destination-mac $VAGRANT -j ACCEPT
+arptables -A OUTPUT --source-mac $VAGRANT_LOCAL -j ACCEPT
+arptables -A INPUT --destination-mac $VAGRANT_LOCAL -j ACCEPT
+arptables -A OUTPUT --source-mac $VAGRANT_OUTSIDE -j ACCEPT
+arptables -A INPUT --destination-mac $VAGRANT_OUTSIDE -j ACCEPT
 
 # Change all policies to drop all packets
 arptables -P INPUT DROP
