@@ -1,6 +1,6 @@
 # seminar-intersct-project
 
-## Deploy
+## Deploy gateway (client)
 1. Clone this repo
 2. Put your OpenVPN configuration file/certificate inside the "vagrant box" directory
 3. Reserve a static IP on your LAN. It will be used for the gateway
