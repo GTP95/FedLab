@@ -25,5 +25,5 @@ arptables -A INPUT --destination-mac $VAGRANT -j ACCEPT
 # Change all policies to drop all packets
 arptables -P INPUT DROP
 arptables -P OUTPUT DROP
-arptables -P FORWARD DROP
+#arptables -P FORWARD DROP
 
