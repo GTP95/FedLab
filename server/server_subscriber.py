@@ -196,6 +196,8 @@ class MqttAclManager:
 
     # called when a relevant PUB message is received from the broker
     def on_message(self, client, userdata, msg):
+        print(msg.topic+" "+str(msg.payload))
+        
         if msg.topic == "aclUpdate":
             self.handle_acl_update(msg)
 
