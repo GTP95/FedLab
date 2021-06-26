@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="Device Directory:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/Device_Directory_jar</output-path>
-    <root id="archive" name="Device Directory.jar">
-      <element id="module-output" name="Device Directory" />
-    </root>
-  </artifact>
-</component>
