@@ -24,3 +24,6 @@ services:
 
   subscriber:
     build: .
+    ports:
+    - "1024:1024/tcp"
+    restart: unless-stopped
