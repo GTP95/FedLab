@@ -6,12 +6,12 @@ RUN mkdir /server-subscriber
 
 # Install & configure Java 11
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
-RUN apk add openjdk11
+RUN apt-get -y update && apt-get -y install openjdk-11-jdk
 ENV PATH=$PATH:${JAVA_HOME}/bin
 
 # Copy the needed software
 COPY server_subscriber.py /server-subscriber/server_subscriber.py
-COPY Device\ Directory/out/artifacts/Device_Directory_jar/Device\ Directory.jar /server-subscriber/device_directory.jar
+COPY device-directory/out/artifacts/Device_Directory_jar/device_directory.jar /server-subscriber/device_directory.jar
 
 # Execute software
 CMD python /server-subscriber/server_subscriber.py -s mqtt -p 1883
