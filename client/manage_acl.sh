@@ -18,7 +18,7 @@
 
 # Script has to be run as sudo to modify arptables
 if [ "$EUID" -ne 0 ]
-  then echo "Please run the script as root (sudo ipRules ...)"
+  then echo "Please run the script as root (sudo manage_acl.sh ...)"
   exit
 fi
 
@@ -52,7 +52,7 @@ if [ "$1" = 'add' ]
     then echo "Added"
     PARAM="-A"
 	# Add mac addresses to the file
-	echo "$NEW_MAC $CURRENT_TIME" >> $file_name
+	echo "$NEW_MAC $CURRENT_TIME offline" >> $file_name
     SET=1
 	mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROOKER"
 elif [ "$1" = 'remove' ]
