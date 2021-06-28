@@ -12,7 +12,9 @@ ENV PATH=$PATH:${JAVA_HOME}/bin
 # Copy the needed software
 COPY server_subscriber.py /server-subscriber/server_subscriber.py
 COPY device-directory/out/artifacts/Device_Directory_jar/device_directory.jar /server-subscriber/device_directory.jar
+COPY start.sh /server-subscriber/start.sh
+
+run chmod +x /server-subscriber/start.sh
 
 # Execute software
-CMD python /server-subscriber/server_subscriber.py -s mqtt -p 1883
-CMD java -jar /server-subscriber/device_directory.jar
+CMD /server-subscriber/start.sh
