@@ -8,7 +8,6 @@ CERT="certificate.ovpn"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
-  #Edit the next line with the IP you reserverd for the VM
   config.vm.network "public_network", ip: VM_IP
   
   #Copy all the needed scripts inside the VM
