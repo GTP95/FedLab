@@ -70,8 +70,10 @@ fi
 # TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
 # Create a rule such that OUT going packets are from a registered IoT device
 arptables $PARAM OUTPUT --source-mac $NEW_MAC -j ACCEPT
+arptables $PARAM OUTPUT --destination-mac $NEW_MAC -j ACCEPT
 # Create a rule such that IN going packets are going to a registered IoT device
 arptables $PARAM INPUT --destination-mac $NEW_MAC -j ACCEPT
+arptables $PARAM INPUT --source-mac $NEW_MAC -j ACCEPT
 
 
 
