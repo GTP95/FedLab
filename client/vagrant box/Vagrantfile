@@ -4,7 +4,7 @@
 VM_IP="192.168.1.201"
 
 #In next line, substitute "certificate.ovpn" with the name of your OpenVPN certificate
-CERT="certificate.ovpn"
+CERT="max.ovpn"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "echo 600 > /proc/sys/net/ipv4/neigh/default/base_reachable_time", run: 'always'
   
   #read out the ARP table to a temporary file, since /proc/net/arp is dynamically generated when called, hence cannot be observed
-  config.vm.provision "shell", inline: "echo \"*/2 * * * * cat /proc/net/arp > /tmp/arp_table\" | crontab -", run: 'always'  
+  config.vm.provision "shell", inline: "echo \"* * * * * cat /proc/net/arp > /tmp/arp_table\" | crontab -", run: 'always'  
   
   #set up crontab
   config.vm.provision "shell", inline: "/etc/init.d/cron restart", run: 'always'
@@ -59,7 +59,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "echo running init.sh script", run: 'always'
   config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'
   config.vm.provision "shell", inline: "echo starting OpenVPN", run: 'always'
-  config.vm.provision "shell", inline: "sudo openvpn --config #{CERT} ", run: 'always'
+  config.vm.provision "shell", inline: "sudo openvpn --config #{CERT} &", run: 'always'
   config.vm.provision "shell", inline: "echo starting arp_table_observer.py", run: 'always'
   config.vm.provision "shell", inline: "python3.9 arp_table_observer.py &", run: 'always'
 end
