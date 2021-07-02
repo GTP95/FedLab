@@ -5,11 +5,10 @@ import re
 from watchdog.observers import Observer
 from watchdog.events import *
 import math
-import paho.mqtt.client as mqtt
 
 # 2 weeks
 TTL = 14*24*60*60
-SERVER = "localhost"
+SERVER = "172.20.0.1"
 PORT = 1883
 
 class AclEntry:
@@ -50,18 +49,10 @@ class AclEntry:
 
 
 class ArpChangeHandler(FileSystemEventHandler):
-
-    # def __init__(self) -> None:
-    #     super().__init__()
-        # self.previous_call = time.time()
     
     def on_modified(self, event):
         if event.is_directory:
             return
-
-        # if time.time() - self.previous_call > 30:
-        #     self.previous_call = time.time()
-        #     return
 
         init_files_if_not_exists()
 
@@ -120,23 +111,9 @@ class ArpChangeHandler(FileSystemEventHandler):
 
 
 class MqttDeviceStatusManager:
-    def __init__(self):
-        self.client = mqtt.Client(protocol=mqtt.MQTTv5)
-        self.client.on_connect = self.on_connect
-
-        self.client.connect(SERVER, PORT, 60)
-
-    # called when a CONNACK is received from the server, i.e. when a connection has been established
-    def on_connect(self, client, userdata, flags, rc, fifth_argument):
-        if rc==0:
-            print("Connected successfully")
-        else:
-            print("Connection attempt failed")
-
     def publish_device_update(self, mac_addr, status):
-        message = "device_status_update", "{} {}".format(mac_addr, status)
-        print("publishing message: {}".format(message))
-        self.client.publish("device_status_update", "{} {}".format(mac_addr, status))
+        # use MQTT-CLI to publish the message
+        os.system("mqtt pub -h {} -t device_status_update -m '{} {}'".format(SERVER, mac_addr, status))
 
 
 mqtt_client = MqttDeviceStatusManager()
@@ -163,8 +140,6 @@ if __name__ == "__main__":
         while True:
             # keep alive
             time.sleep(1)
-        else:
-            print("got it")
     except KeyboardInterrupt:
         observer.stop()
 

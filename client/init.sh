@@ -9,8 +9,7 @@ fi
 arptables -A OUTPUT -o tun0 -j ACCEPT
 arptables -A INPUT -i tun0 -j ACCEPT
 
-
-# Change all policies to drop all packets
+# Set the policies to drop all packets
 arptables -P INPUT DROP
 arptables -P OUTPUT DROP
 #arptables -P FORWARD DROP
