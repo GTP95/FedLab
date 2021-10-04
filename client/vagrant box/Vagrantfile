@@ -1,14 +1,18 @@
 ### CONFIGUARTION PARAMETERS ###
 
-#In the next line, change 192.168.1.201 to the IP you reserved for the gateway
-VM_IP="192.168.1.201"
+#In the next line, change 192.168.5.1 to the IP you want the gateway to use.
+#WARNING: make sure the IP you choose does not interfere with any existing networks.
+VM_IP="192.168.5.1"
 
-#In next line, substitute "certificate.ovpn" with the name of your OpenVPN certificate
-CERT="max.ovpn"
+#In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use
+LAB_SUBNET_ADAPTER="<YOUR_LAB_SUBNET_ADAPTER>"
+
+#In next line, substitute "YOUR_CERTIFICATE.ovpn" with the name of your OpenVPN certificate
+CERT="<YOUR_CERTIFICATE.ovpn>"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
-  config.vm.network "public_network", ip: VM_IP
+  config.vm.network "public_network", ip: VM_IP, bridge: LAB_SUBNET_ADAPTER
   
   #Copy all the needed scripts inside the VM
   config.vm.provision "file", source: "iptables.sh", destination: "~/iptables.sh"
@@ -27,6 +31,17 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "wget https://github.com/hivemq/mqtt-cli/releases/download/v4.6.2/mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "sudo apt-get -y install ./mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "rm mqtt-cli-4.6.2.deb"
+  
+  #Install DHCP server, set up configuration files and start service
+  config.vm.provision "shell", inline: "sudo apt-get -y install isc-dhcp-server"
+  config.vm.provision "shell", inline: "mkdir ~/tmp"
+  config.vm.provision "file", source: "../dhcp_conf1", destination: "~/tmp/dhcpd.conf"
+  config.vm.provision "shell", inline: "dos2unix /home/vagrant/tmp/dhcpd.conf"
+  config.vm.provision "shell", inline: "sudo mv /home/vagrant/tmp/dhcpd.conf /etc/dhcp/dhcpd.conf"
+  config.vm.provision "file", source: "../dhcp_conf2", destination: "~/tmp/isc-dhcp-server"
+  config.vm.provision "shell", inline: "dos2unix /home/vagrant/tmp/isc-dhcp-server"
+  config.vm.provision "shell", inline: "sudo mv /home/vagrant/tmp/isc-dhcp-server /etc/default/isc-dhcp-server"
+  config.vm.provision "shell", inline: "sudo systemctl start isc-dhcp-server"
   
   #Fix CRLF in case host is running Windows
   config.vm.provision "shell", inline: "dos2unix iptables.sh"
