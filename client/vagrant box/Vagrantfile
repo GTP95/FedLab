@@ -1,7 +1,8 @@
 ### CONFIGUARTION PARAMETERS ###
 
 #In the next line, change 192.168.5.1 to the IP you want the gateway to use.
-#WARNING: make sure the IP you choose does not interfere with any existing networks.
+#WARNING: make sure the IP you choose does not interfere with any existing networks,
+#i.e. please use a subnet that is not in use.
 VM_IP="192.168.5.1"
 
 #In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use
@@ -35,10 +36,10 @@ Vagrant.configure("2") do |config|
   #Install DHCP server, set up configuration files and start service
   config.vm.provision "shell", inline: "sudo apt-get -y install isc-dhcp-server"
   config.vm.provision "shell", inline: "mkdir ~/tmp"
-  config.vm.provision "file", source: "../dhcp_conf1", destination: "~/tmp/dhcpd.conf"
+  config.vm.provision "file", source: "dhcp_conf1", destination: "~/tmp/dhcpd.conf"
   config.vm.provision "shell", inline: "dos2unix /home/vagrant/tmp/dhcpd.conf"
   config.vm.provision "shell", inline: "sudo mv /home/vagrant/tmp/dhcpd.conf /etc/dhcp/dhcpd.conf"
-  config.vm.provision "file", source: "../dhcp_conf2", destination: "~/tmp/isc-dhcp-server"
+  config.vm.provision "file", source: "dhcp_conf2", destination: "~/tmp/isc-dhcp-server"
   config.vm.provision "shell", inline: "dos2unix /home/vagrant/tmp/isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo mv /home/vagrant/tmp/isc-dhcp-server /etc/default/isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo systemctl start isc-dhcp-server"
