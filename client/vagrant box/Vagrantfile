@@ -71,9 +71,12 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "echo configuring iptables"
   config.vm.provision "shell", inline: "sudo bash iptables.sh", run: 'always'
   
-  #Start OpenVPN, init.sh and arp_table_observer.py
+  #Start init.sh and register the MAC of the internet-facing interface in the ACL
   config.vm.provision "shell", inline: "echo running init.sh script", run: 'always'
   config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'
+  config.vm.provision "shell", inline: "sudo bash manage_acl.sh add 02:92:ed:75:ec:ea", run: 'always'
+  
+  #Start OpenVPN and arp_table_observer.py
   config.vm.provision "shell", inline: "echo starting OpenVPN", run: 'always'
   config.vm.provision "shell", inline: "sudo openvpn --config #{CERT} &", run: 'always'
   config.vm.provision "shell", inline: "echo starting arp_table_observer.py", run: 'always'
