@@ -5,7 +5,7 @@
 #i.e. please use a subnet that is not in use.
 VM_IP="192.168.5.1"
 
-#In the next line, substitute <YOUR-IP-RANGE> with
+#In the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
 IP_RANGE="<YOUR-IP-RANGE>"
 
 #In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use
