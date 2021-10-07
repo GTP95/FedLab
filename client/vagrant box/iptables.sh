@@ -13,8 +13,8 @@ iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
 # EDIT THE FOLLOWING TWO LINES. Make sure that the gateway can communicate within your own network
-iptables -A INPUT -s <YOUR_IP_RANGE> -j ACCEPT
-iptables -A OUTPUT -d <YOUR_IP_RANGE> -j ACCEPT
+iptables -A INPUT -s $1 -j ACCEPT
+iptables -A OUTPUT -d $1 -j ACCEPT
 
 # for now, accept requests from the gateway. TODO: refine or remove
 iptables -A OUTPUT -j ACCEPT
@@ -48,7 +48,7 @@ iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
 iptables -A FORWARD -i enp0s3 -o enp0s8 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
 # EDIT THE FOLLOWING LINE. drop traffic from IoT devices to your own LAN range
-iptables -A FORWARD -i enp0s8 -o enp0s3 -d <YOUR_IP_RANGE> -j DROP
+iptables -A FORWARD -i enp0s8 -o enp0s3 -d $1 -j DROP
 
 # accept remaining traffic from IoT devices (i.e. everything except your own LAN range)
 iptables -A FORWARD -i enp0s8 -o enp0s3 -j ACCEPT
