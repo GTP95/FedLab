@@ -14,3 +14,7 @@ arptables -P INPUT DROP
 arptables -P OUTPUT DROP
 #arptables -P FORWARD DROP
 
+# Add MAC of gateway
+MAC_ADDR=`ip a show enp0s3 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}' | head -1`
+arptables -A OUTPUT --source-mac $MAC_ADDR -j ACCEPT
+arptables -A INPUT --destination-mac $MAC_ADDR -j ACCEPT
