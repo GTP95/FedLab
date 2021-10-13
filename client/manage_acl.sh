@@ -28,7 +28,7 @@ fi
 file_name="MAC_addresses"
 touch $file_name
 
-IP_BROOKER="172.20.0.1"
+IP_BROOKER="10.0.2.2"
 CURRENT_TIME=$(date +%s)
 
 MAC="$2"
@@ -52,10 +52,8 @@ if [ "$1" = 'add' ]
 	
 	# TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
 	# Create a rule such that OUT going packets are from a registered IoT device
-	arptables -A OUTPUT --source-mac $NEW_MAC -j ACCEPT
 	arptables -A OUTPUT --destination-mac $NEW_MAC -j ACCEPT
 	# Create a rule such that IN going packets are going to a registered IoT device
-	arptables -A INPUT --destination-mac $NEW_MAC -j ACCEPT
 	arptables -A INPUT --source-mac $NEW_MAC -j ACCEPT
 elif [ "$1" = 'remove' ]
     then echo "Removed"
@@ -71,10 +69,6 @@ elif [ "$1" = 'remove' ]
 	# Delete that line number
 	TEST=$(sudo arptables --list --line-numbers | sed -n '/INPUT/,/^$/p' | grep -i "src-mac $NEW_MAC" | head -n 1 | cut -c-1)
 	arptables -D INPUT $TEST
-	TEST=$(sudo arptables --list --line-numbers | sed -n '/INPUT/,/^$/p' | grep -i "dst-mac $NEW_MAC" | head -n 1 | cut -c-1)
-	arptables -D INPUT $TEST
-	TEST=$(sudo arptables --list --line-numbers | sed -n '/OUTPUT/,/^$/p' | grep -i "src-mac $NEW_MAC" | head -n 1 | cut -c-1)
-	arptables -D OUTPUT $TEST
 	TEST=$(sudo arptables --list --line-numbers | sed -n '/OUTPUT/,/^$/p' | grep -i "dst-mac $NEW_MAC" | head -n 1 | cut -c-1)
 	arptables -D OUTPUT $TEST
 else
