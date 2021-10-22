@@ -15,7 +15,7 @@ SUBNET_IP="192.168.5.0"
 NETMASK="255.255.255.0"
 
 #The next two lines define the range of IPs used by the DHCP server of the network created to connect the devices. The first is the starting IP, the second is
-#the las IP. Change to specify the range you wish to use, or leave as is to use defaults.
+#the last IP. Change to specify the range you wish to use, or leave as is to use defaults.
 STARTING_IP="192.168.5.2"
 ENDING_IP="192.168.5.255"
 
