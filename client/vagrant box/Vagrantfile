@@ -1,4 +1,4 @@
-### CONFIGUARTION PARAMETERS ###
+### CONFIGURATION PARAMETERS ###
 
 #In the next line, change 192.168.5.1 to the IP you want the gateway to use.
 #WARNING: make sure the IP you choose does not interfere with any existing networks,
