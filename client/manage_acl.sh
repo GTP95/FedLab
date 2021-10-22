@@ -28,7 +28,7 @@ fi
 file_name="MAC_addresses"
 touch $file_name
 
-IP_BROOKER="172.20.0.1"
+IP_BROOKER="10.0.2.2"
 CURRENT_TIME=$(date +%s)
 
 MAC="$2"
@@ -42,38 +42,41 @@ else
 	exit
 fi
 
-# Standard  invalid param
-PARAM="-INVALID"
-SET=0
-
 # Determine if the first argument has been set correctly
 # TODO: Does MQTT also need the timestamp (probably not)
 if [ "$1" = 'add' ]
     then echo "Added"
-    PARAM="-A"
 	# Add mac addresses to the file
 	echo "$NEW_MAC $CURRENT_TIME offline" >> $file_name
-    SET=1
 	mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROOKER"
+	
+	# TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
+	# Create a rule such that OUT going packets are from a registered IoT device
+	arptables -A OUTPUT --destination-mac $NEW_MAC -j ACCEPT
+	# Create a rule such that IN going packets are going to a registered IoT device
+	arptables -A INPUT --source-mac $NEW_MAC -j ACCEPT
 elif [ "$1" = 'remove' ]
     then echo "Removed"
-    PARAM="-D"
 	# Remove mac address and time from the file
 	sed -i "/$NEW_MAC/d" $file_name
-    SET=1
 	mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROOKER"
+	# Find line numbers of the specific rules and delete them
+	# Get all the arptables with their line numbers
+	# Only show that paragraph
+	# Grab the lines with the correct src/dst-mac address
+	# Only grab the first line
+	# Only grab the first character (the line number)
+	# Delete that line number
+	TEST=$(sudo arptables --list --line-numbers | sed -n '/INPUT/,/^$/p' | grep -i "src-mac $NEW_MAC" | head -n 1 | cut -c-1)
+	arptables -D INPUT $TEST
+	TEST=$(sudo arptables --list --line-numbers | sed -n '/OUTPUT/,/^$/p' | grep -i "dst-mac $NEW_MAC" | head -n 1 | cut -c-1)
+	arptables -D OUTPUT $TEST
 else
 	echo "Please use 'remove' or 'add' after ipRules"
     exit
 fi
 
-# TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
-# Create a rule such that OUT going packets are from a registered IoT device
-arptables $PARAM OUTPUT --source-mac $NEW_MAC -j ACCEPT
-arptables $PARAM OUTPUT --destination-mac $NEW_MAC -j ACCEPT
-# Create a rule such that IN going packets are going to a registered IoT device
-arptables $PARAM INPUT --destination-mac $NEW_MAC -j ACCEPT
-arptables $PARAM INPUT --source-mac $NEW_MAC -j ACCEPT
+
 
 
 
