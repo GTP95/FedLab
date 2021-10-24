@@ -6,7 +6,7 @@
 VM_IP="192.168.5.1"
 
 #In the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
-IP_RANGE="<YOUR-IP-RANGE>"
+IP_RANGE="131.155.68.1/22"
 
 #In the next line, substitute 192.168.5.0 with the IP of the subnet you wish to create to connect the devices or leave as is to use default
 SUBNET_IP="192.168.5.0"
@@ -15,15 +15,15 @@ SUBNET_IP="192.168.5.0"
 NETMASK="255.255.255.0"
 
 #The next two lines define the range of IPs used by the DHCP server of the network created to connect the devices. The first is the starting IP, the second is
-#the las IP. Change to specify the range you wish to use, or leave as is to use defaults.
+#the last IP. Change to specify the range you wish to use, or leave as is to use defaults.
 STARTING_IP="192.168.5.2"
 ENDING_IP="192.168.5.255"
 
 #In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use to connect the Gateway to WAN (probably your pre-existing LAN)
-LAB_SUBNET_ADAPTER="<YOUR_LAB_SUBNET_ADAPTER>"
+LAB_SUBNET_ADAPTER="enp0s20u6"
 
 #In next line, substitute "YOUR_CERTIFICATE.ovpn" with the name of your OpenVPN certificate
-CERT="<YOUR_CERTIFICATE.ovpn>"
+CERT="intersect.ovpn"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
@@ -50,23 +50,23 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "rm mqtt-cli-4.6.2.deb"
  
   #Fix CRLF in case host is running Windows
-  config.vm.provision "shell", inline: "dos2unix ~/iptables.sh"
-  config.vm.provision "shell", inline: "dos2unix ~/manage_acl.sh"
-  config.vm.provision "shell", inline: "dos2unix ~/arp_table_observer.py"
-  config.vm.provision "shell", inline: "dos2unix ~/init.sh"
-  config.vm.provision "shell", inline: "dos2unix ~/#{CERT}"
-  config.vm.provision "shell", inline: "dos2unix ~/dhcpd.conf"
-  config.vm.provision "shell", inline: "dos2unix ~/isc-dhcp-server"
+  config.vm.provision "shell", inline: "dos2unix iptables.sh"
+  config.vm.provision "shell", inline: "dos2unix manage_acl.sh"
+  config.vm.provision "shell", inline: "dos2unix arp_table_observer.py"
+  config.vm.provision "shell", inline: "dos2unix init.sh"
+  config.vm.provision "shell", inline: "dos2unix #{CERT}"
+  config.vm.provision "shell", inline: "dos2unix dhcpd.conf"
+  config.vm.provision "shell", inline: "dos2unix isc-dhcp-server"
  
   #Install DHCP server, set up configuration files and start service
-  config.vm.provision "shell", inline: "sed -i '15s/192.168.5.1/#{VM_IP}/' ~/dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '13s/192.168.5.0/#{SUBNET_IP}/' ~/dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '13s/255.255.255.0/#{NETMASK}/' ~/dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '14s/192.168.5.2/#{STARTING_IP}/' ~/dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '14s/192.168.5.255/#{ENDING_IP}/g' ~/dhcpd.conf"
+  config.vm.provision "shell", inline: "sed -i '15s/192.168.5.1/#{VM_IP}/' dhcpd.conf"
+  config.vm.provision "shell", inline: "sed -i '13s/192.168.5.0/#{SUBNET_IP}/' dhcpd.conf"
+  config.vm.provision "shell", inline: "sed -i '13s/255.255.255.0/#{NETMASK}/' dhcpd.conf"
+  config.vm.provision "shell", inline: "sed -i '14s/192.168.5.2/#{STARTING_IP}/' dhcpd.conf"
+  config.vm.provision "shell", inline: "sed -i '14s/192.168.5.255/#{ENDING_IP}/g' dhcpd.conf"
   config.vm.provision "shell", inline: "sudo apt-get -y install isc-dhcp-server"
-  config.vm.provision "shell", inline: "sudo mv ~/dhcpd.conf /etc/dhcp/dhcpd.conf"
-  config.vm.provision "shell", inline: "sudo mv ~/isc-dhcp-server /etc/default/isc-dhcp-server"
+  config.vm.provision "shell", inline: "sudo mv dhcpd.conf /etc/dhcp/dhcpd.conf"
+  config.vm.provision "shell", inline: "sudo mv isc-dhcp-server /etc/default/isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo systemctl enable isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo systemctl start isc-dhcp-server"
 
