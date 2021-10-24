@@ -38,7 +38,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "dhcp_conf1", destination: "~/dhcpd.conf"
   config.vm.provision "file", source: "dhcp_conf2", destination: "~/isc-dhcp-server"
   config.vm.provision "file", source: "../acl_persistence.py", destination: "~/acl_persistence.py"
-  
+
+  #Give execution rights to manually-invoked scripts 
+  config.vm.provision "shell", inline: "chmod +x manage_acl.sh"
+ 
   #Update VM, install OpenVPN, dos2unix, python3.9 and scripts' dependencies
   config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
   config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip"

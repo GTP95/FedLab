@@ -4,8 +4,9 @@ import os
 try:
 	file=open('MAC_addresses', 'r')
 
-	for macAddress in file:
-		macAddress.strip()	#removes newline
+	for line in file:
+		tmpList=line.split(" ", 1)	#splits line after space
+		macAddress=tmpList[0]
 		os.system("arptables -A OUTPUT --destination-mac " + macAddress + " -j ACCEPT")
 		os.system("arptables -A INPUT --source-mac" + macAddress + " -j ACCEPT")
 	file.close()
