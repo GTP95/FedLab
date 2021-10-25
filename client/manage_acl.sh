@@ -48,6 +48,18 @@ if [ "$1" = 'add' ]
     then echo "Added"
 	# Add mac addresses to the file
 	echo "$NEW_MAC $CURRENT_TIME offline" >> $file_name
+	
+	# Allow the device to get an IP address via DHCP
+    cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
+    WORDS=$(cat MAC_addresses)
+    for WORD in $WORDS
+    do
+        if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
+            then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
+        fi
+    done
+    sudo systemctl restart isc-dhcp-server
+	
 	mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROOKER"
 	
 	# TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
@@ -59,6 +71,18 @@ elif [ "$1" = 'remove' ]
     then echo "Removed"
 	# Remove mac address and time from the file
 	sed -i "/$NEW_MAC/d" $file_name
+	
+	# Remove the device from the DHCP allow-list
+    cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
+    WORDS=$(cat MAC_addresses)
+    for WORD in $WORDS
+    do
+        if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
+            then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
+        fi
+    done
+    sudo systemctl restart isc-dhcp-server
+	
 	mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROOKER"
 	# Find line numbers of the specific rules and delete them
 	# Get all the arptables with their line numbers
