@@ -17,6 +17,9 @@ services:
     ports:
       - "1883:1883/tcp"
       - "8080:8080/tcp"
+    networks:
+      intersect_server:
+        ipv4_address: 172.16.0.2
     restart: unless-stopped
     environment:
       DOCKER_VERNEMQ_LISTENER__TCP__ALLOWED_PROTOCOL_VERSIONS: 5
@@ -25,5 +28,16 @@ services:
   subscriber:
     build: .
     ports:
-    - "1024:1024/tcp"
+      - "1024:1024/tcp"
+    networks:
+      intersect_server:
+        ipv4_address: 172.16.0.3
     restart: unless-stopped
+
+networks:
+  intersect_server:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.0.0/12
+          gateway: 172.16.0.1
