@@ -28,7 +28,7 @@ fi
 file_name="MAC_addresses"
 touch $file_name
 
-IP_BROOKER="10.0.2.2"
+IP_BROOKER="192.168.201.3"
 CURRENT_TIME=$(date +%s)
 
 MAC="$2"
