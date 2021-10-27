@@ -7,6 +7,9 @@ services:
     container_name: openvpn-server
     ports:
       - "1194:1194/udp"
+    networks:
+      intersect_docker_network:
+        ipv4_address: 192.168.201.4
     restart: unless-stopped
     volumes:
       - ./openvpn-data/conf:/etc/openvpn
@@ -18,8 +21,8 @@ services:
       - "1883:1883/tcp"
       - "8080:8080/tcp"
     networks:
-      intersect_server:
-        ipv4_address: 172.16.0.2
+      intersect_docker_network:
+        ipv4_address: 192.168.201.2
     restart: unless-stopped
     environment:
       DOCKER_VERNEMQ_LISTENER__TCP__ALLOWED_PROTOCOL_VERSIONS: 5
@@ -30,14 +33,14 @@ services:
     ports:
       - "1024:1024/tcp"
     networks:
-      intersect_server:
-        ipv4_address: 172.16.0.3
+      intersect_docker_network:
+        ipv4_address: 192.168.201.3
     restart: unless-stopped
 
 networks:
-  intersect_server:
+  intersect_docker_network:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.16.0.0/12
-          gateway: 172.16.0.1
+        - subnet: 192.168.201.0/24
+          gateway: 192.168.201.4
