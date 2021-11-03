@@ -2,8 +2,6 @@
 
 # To run: sudo manage_acl.sh add/remove mac_address
 
-#TODO: Check if the arptables rules are persistent between sessions/reboots
-
 # Steps for deployment
 # apt install arptables
 
@@ -18,8 +16,8 @@
 
 # Script has to be run as sudo to modify arptables
 if [ "$EUID" -ne 0 ]
-  then echo "Please run the script as root (sudo manage_acl.sh ...)"
-  exit
+    then echo "Please run the script as root (sudo manage_acl.sh ...)"
+    exit
 fi
 
 # Generate a text file in which the mac addresses will be stored
@@ -28,7 +26,7 @@ fi
 file_name="MAC_addresses"
 touch $file_name
 
-IP_BROOKER="192.168.201.3"
+IP_BROKER="192.168.201.3"
 CURRENT_TIME=$(date +%s)
 
 MAC="$2"
@@ -36,10 +34,10 @@ MAC="$2"
 NEW_MAC="${MAC//-/:}"
 
 if [[ $NEW_MAC =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
-	then echo "Correct"
+    then echo "Correct"
 else
-	echo "MAC address is invalid"
-	exit
+    echo "MAC address is invalid"
+    exit
 fi
 
 # Determine if the first argument has been set correctly
@@ -50,17 +48,17 @@ if [ "$1" = 'add' ]
 	echo "$NEW_MAC $CURRENT_TIME offline" >> $file_name
 	
 	# Allow the device to get an IP address via DHCP
-    cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
-    WORDS=$(cat MAC_addresses)
-    for WORD in $WORDS
-    do
-        if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
-            then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
-        fi
-    done
-    sudo systemctl restart isc-dhcp-server
+        cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
+        WORDS=$(cat MAC_addresses)
+        for WORD in $WORDS
+        do
+            if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
+                then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
+            fi
+        done
+        sudo systemctl restart isc-dhcp-server
 	
-	mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROOKER"
+	mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROKER"
 	
 	# TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
 	# Create a rule such that OUT going packets are from a registered IoT device
@@ -73,17 +71,17 @@ elif [ "$1" = 'remove' ]
 	sed -i "/$NEW_MAC/d" $file_name
 	
 	# Remove the device from the DHCP allow-list
-    cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
-    WORDS=$(cat MAC_addresses)
-    for WORD in $WORDS
-    do
-        if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
-            then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
-        fi
-    done
-    sudo systemctl restart isc-dhcp-server
+        cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
+        WORDS=$(cat MAC_addresses)
+        for WORD in $WORDS
+        do
+            if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
+                then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
+            fi
+        done
+        sudo systemctl restart isc-dhcp-server
 	
-	mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROOKER"
+	mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROKER"
 	# Find line numbers of the specific rules and delete them
 	# Get all the arptables with their line numbers
 	# Only show that paragraph
@@ -96,13 +94,6 @@ elif [ "$1" = 'remove' ]
 	TEST=$(sudo arptables --list --line-numbers | sed -n '/OUTPUT/,/^$/p' | grep -i "dst-mac $NEW_MAC" | head -n 1 | cut -c-1)
 	arptables -D OUTPUT $TEST
 else
-	echo "Please use 'remove' or 'add' after ipRules"
+    echo "Please use 'remove' or 'add' after ipRules"
     exit
 fi
-
-
-
-
-
-
-
