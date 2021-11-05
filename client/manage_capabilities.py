@@ -37,7 +37,7 @@ class MqttCapabilityUpdateManager:
     def publish_capability_update(self, operation, capability_string):
         # use MQTT-CLI to publish the message
         # os.system("mqtt pub -h {} -t capability_update -m '{} {}'".format(SERVER, operation, capability_string))
-        # print("mqtt pub -h {} -t capability_update -m '{} {}'".format(SERVER, operation, capability_string))
+        print("\nmqtt pub -h {} -t capability_update -m '{} {}'\n".format(SERVER, operation, capability_string))
         pass
 
 
@@ -54,20 +54,15 @@ def read_directory():
     return result
 
 
-def write_directory(cap_directory_json):
+def write_directory(cap_directory):
     with open("local_capability_directory", 'w') as f:
-        f.write(cap_directory_json)
+        f.write(json.dumps(cap_directory))
 
 
 def pretty_print_directory():
     with open("local_capability_directory", 'r') as f:
         result = json.load(f)
         print(json.dumps(result, indent=2))
-
-
-# for retrieving the OpenVPN client name of the bundle box
-def get_client_name():
-
 
 
 def construct_empty_directory():
@@ -103,32 +98,16 @@ def add_capability(mac, name, desc):
     remote_capability = construct_remote_capability_object(mac, name, desc)
     mqtt_client.publish_capability_update("add", json.dumps(remote_capability))
 
-    cap_directory_json = json.dumps(cap_directory)
-    write_directory(cap_directory_json)
+    write_directory(cap_directory)
 
 
-def remove_capability(mac, name, desc):
+def remove_capability(uuid):
     cap_directory = read_directory()
+    print(cap_directory['capabilities'])
 
-    # TODO: not yet implemented
+    # only keep items that do not have the specified UUID
+    cap_directory['capabilities'] = list(filter(lambda x: x["capability_id"] != uuid, cap_directory['capabilities']))
 
+    mqtt_client.publish_capability_update("remove", uuid)
 
-# if __name__ == "__main__":
-#     path, _ = os.path.split(os.path.realpath(__file__))
-#     os.chdir(path)
-#
-#     parser = argparse.ArgumentParser(description="Utility to manage the capabilities exposed by this bundle box.")
-#
-#     parser.add_argument("-m", "--mac", metavar="mac_addr", type=str, required=True,
-#         help="The MAC address of the device for which you want to add a capability.")
-#
-#     parser.add_argument("-n", "--name", metavar="capability_name", type=str, required=True,
-#         help="The name of the capability as it will show up in the capability directory")
-#
-#     parser.add_argument("-d", "--description", metavar="capability_desc", type=str, required=True,
-#         help="The description of the capability as it will show up in the capability directory")
-#
-#     args = parser.parse_args()
-#
-#     add_capability(args.mac, args.name, args.description)
-#     pretty_print_directory()
+    write_directory(cap_directory)
