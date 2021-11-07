@@ -26,7 +26,7 @@ fi
 file_name="MAC_addresses"
 touch $file_name
 
-IP_BROOKER="192.168.201.2"
+IP_BROKER="192.168.201.2"
 
 CURRENT_TIME=$(date +%s)
 
@@ -49,15 +49,15 @@ if [ "$1" = 'add' ]
 	echo "$NEW_MAC $CURRENT_TIME offline" >> $file_name
 	
 	# Allow the device to get an IP address via DHCP
-        cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
-        WORDS=$(cat MAC_addresses)
-        for WORD in $WORDS
-        do
-            if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
-                then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
-            fi
-        done
-        sudo systemctl restart isc-dhcp-server
+    cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
+    WORDS=$(cat MAC_addresses)
+    for WORD in $WORDS
+    do
+        if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
+            then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
+        fi
+    done
+    sudo systemctl restart isc-dhcp-server
 	
 	mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROKER"
 	
@@ -72,15 +72,15 @@ elif [ "$1" = 'remove' ]
 	sed -i "/$NEW_MAC/d" $file_name
 	
 	# Remove the device from the DHCP allow-list
-        cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
-        WORDS=$(cat MAC_addresses)
-        for WORD in $WORDS
-        do
-            if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
-                then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
-            fi
-        done
-        sudo systemctl restart isc-dhcp-server
+    cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
+    WORDS=$(cat MAC_addresses)
+    for WORD in $WORDS
+    do
+        if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
+            then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
+        fi
+    done
+    sudo systemctl restart isc-dhcp-server
 	
 	mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROKER"
 	# Find line numbers of the specific rules and delete them
