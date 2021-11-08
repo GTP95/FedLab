@@ -45,20 +45,15 @@ fi
 # TODO: Does MQTT also need the timestamp (probably not)
 if [ "$1" = 'add' ]
     then echo "Added"
+    IP_ADDR=`./get_random_ip.py 192.168.3.2 192.168.5.255`
     # Add mac addresses to the file
-    echo "$NEW_MAC $CURRENT_TIME offline" >> $file_name
-	
-	# Allow the device to get an IP address via DHCP
+    echo "$IP_ADDR $NEW_MAC $CURRENT_TIME offline" >> $file_name
+
+	  # Allow the device to get an IP address via DHCP
     cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
-    WORDS=$(cat MAC_addresses)
-    for WORD in $WORDS
-    do
-        if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
-            then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
-        fi
-    done
+    ./configure_dhcp.py
     sudo systemctl restart isc-dhcp-server
-	
+
     mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROKER"
 
     # TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
@@ -70,8 +65,8 @@ elif [ "$1" = 'remove' ]
     then echo "Removed"
     # Remove mac address and time from the file
     sed -i "/$NEW_MAC/d" $file_name
-	
-	# Remove the device from the DHCP allow-list
+
+  	# Remove the device from the DHCP allow-list
     cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
     WORDS=$(cat MAC_addresses)
     for WORD in $WORDS
@@ -81,7 +76,7 @@ elif [ "$1" = 'remove' ]
         fi
     done
     sudo systemctl restart isc-dhcp-server
-	
+
     mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROKER"
     # Find line numbers of the specific rules and delete them
     # Get all the arptables with their line numbers
