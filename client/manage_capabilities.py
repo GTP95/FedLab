@@ -23,22 +23,24 @@
 import json
 import os
 import uuid
-import argparse
 
 
 # 2 weeks
 TTL = 14*24*60*60
 SERVER = "10.0.2.2"
 PORT = 1883
-OPENVPN_CLIENT_NAME = "INTERSECT2" # configure this
+OPENVPN_CLIENT_NAME = "INTERSECT2"  # configure this
 
 
 class MqttCapabilityUpdateManager:
     def publish_capability_update(self, operation, capability_string):
         # use MQTT-CLI to publish the message
         # os.system("mqtt pub -h {} -t capability_update -m '{} {}'".format(SERVER, operation, capability_string))
-        print("\nmqtt pub -h {} -t capability_update -m '{} {}'\n".format(SERVER, operation, capability_string))
-        pass
+        print("\nmqtt pub -h {} -t capability_update -m '{} {}'\n".format(
+            SERVER,
+            operation,
+            capability_string
+        ))
 
 
 mqtt_client = MqttCapabilityUpdateManager()
@@ -67,7 +69,7 @@ def pretty_print_directory():
 
 def construct_empty_directory():
     with open("local_capability_directory", 'w') as f:
-        f.write(json.dumps({ "capabilities": [] }))
+        f.write(json.dumps({"capabilities": []}))
 
 
 def construct_local_capability_object(mac, name, desc):
@@ -106,7 +108,10 @@ def remove_capability(uuid):
     print(cap_directory['capabilities'])
 
     # only keep items that do not have the specified UUID
-    cap_directory['capabilities'] = list(filter(lambda x: x["capability_id"] != uuid, cap_directory['capabilities']))
+    cap_directory['capabilities'] = list(filter(
+        lambda x: x["capability_id"] != uuid,
+        cap_directory['capabilities'])
+    )
 
     mqtt_client.publish_capability_update("remove", uuid)
 
