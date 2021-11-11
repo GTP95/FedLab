@@ -1,11 +1,14 @@
 package ml.gtpware;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 
 public class FileReader {
     private Path filePath;
@@ -13,6 +16,8 @@ public class FileReader {
     private HashSet<Capability> capabilitiesSet;    //Using a set to automatically avoid duplicates
     private static FileReader instance;
     private final Gson gson;
+    private static final Type CapabilitiesList = new TypeToken<List<Capability>>() {
+    }.getType();
 
     private FileReader(){
         this.prettyFormattedDeviceDirectoryContent="Waiting for data";
