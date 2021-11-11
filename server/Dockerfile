@@ -11,7 +11,8 @@ ENV PATH=$PATH:${JAVA_HOME}/bin
 
 # Copy the needed software
 COPY server_subscriber.py /server-subscriber/server_subscriber.py
-COPY device-directory/out/artifacts/Device_Directory_jar/device_directory.jar /server-subscriber/device_directory.jar
+ARG src="device-directory/out/artifacts/Device_Directory_jar/Device Directory.jar"
+COPY ${src} /server-subscriber/device_directory.jar
 COPY start.sh /server-subscriber/start.sh
 
 run chmod +x /server-subscriber/start.sh
