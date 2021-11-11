@@ -11,15 +11,16 @@ TTL = 14*24*60*60
 SERVER = "10.0.2.2"
 PORT = 1883
 
+
 class AclEntry:
     def __init__(self, entry):
         if not self.is_valid_entry(entry):
             raise RuntimeError("The ACL entry was not valid: " + entry)
-        self.mac_addr, self.last_used, self.status = entry.split()
+        self.ip, self.mac_addr, self.last_used, self.status = entry.split()
         self.last_used = int(self.last_used)
 
     def __str__(self):
-        return "{} {} {}".format(self.mac_addr, self.last_used, self.status)
+        return "{} {} {} {}".format(self.ip, self.mac_addr, self.last_used, self.status)
 
     @staticmethod
     def is_valid_entry(line):
@@ -27,9 +28,12 @@ class AclEntry:
         if len(words) != 3:
             return False
 
+        ip_regex = r'[0-9]+(?:\.[0-9]+){3}'
+        ip_regex_obj = re.compile(ip_regex)
+
         # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
-        mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
-                "{5}([0-9A-Fa-f]{2})")            
+        mac_regex = ("^([0-9A-Fa-f]{2}[:-])"
+                     + "{5}([0-9A-Fa-f]{2})")
         mac_regex_obj = re.compile(mac_regex)
 
         number_regex = "^\d+$"
@@ -38,18 +42,20 @@ class AclEntry:
         status_regex = "^(online|offline)$"
         status_regex_obj = re.compile(status_regex)
 
-        if not re.search(mac_regex_obj, words[0]):
+        if not re.search(ip_regex_obj, words[0]):
             return False
-        if not re.search(number_regex_obj, words[1]):
+        if not re.search(mac_regex_obj, words[1]):
             return False
-        if not re.search(status_regex_obj, words[2]):
+        if not re.search(number_regex_obj, words[2]):
+            return False
+        if not re.search(status_regex_obj, words[3]):
             return False
 
         return True
 
 
 class ArpChangeHandler(FileSystemEventHandler):
-    
+
     def on_modified(self, event):
         if event.is_directory:
             return
@@ -64,8 +70,8 @@ class ArpChangeHandler(FileSystemEventHandler):
             for line in file:
                 for word in line.split():
                     # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
-                    mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
-                            "{5}([0-9A-Fa-f]{2})")            
+                    mac_regex = ("^([0-9A-Fa-f]{2}[:-])"
+                                 + "{5}([0-9A-Fa-f]{2})")
                     mac_regex_obj = re.compile(mac_regex)
 
                     if re.search(mac_regex_obj, word):
@@ -74,7 +80,7 @@ class ArpChangeHandler(FileSystemEventHandler):
         acl = dict[str, AclEntry]()
         with open("MAC_addresses", 'r') as file:
             for line in file:
-                try: 
+                try:
                     entry = AclEntry(line.strip('\n'))
                     acl[entry.mac_addr] = entry
                 except RuntimeError as e:
@@ -89,7 +95,8 @@ class ArpChangeHandler(FileSystemEventHandler):
                 acl[mac_addr].last_used = current_time
                 if entry.status == "offline":
                     acl[mac_addr].status = "online"
-                    mqtt_client.publish_device_update(acl[mac_addr].mac_addr, "online")
+                    mqtt_client.publish_device_update(
+                        acl[mac_addr].mac_addr, "online")
 
             # If a registered MAC address was not found in the ARP table and
             # has not been connected for at least TTL seconds, remove it from the list.
@@ -102,8 +109,8 @@ class ArpChangeHandler(FileSystemEventHandler):
             else:
                 if acl[mac_addr].status == "online":
                     acl[mac_addr].status = "offline"
-                    mqtt_client.publish_device_update(acl[mac_addr].mac_addr, "offline")
-
+                    mqtt_client.publish_device_update(
+                        acl[mac_addr].mac_addr, "offline")
 
         suffix = '\n' if len(acl) > 0 else ''
         with open("MAC_addresses", 'w') as file:
@@ -113,10 +120,12 @@ class ArpChangeHandler(FileSystemEventHandler):
 class MqttDeviceStatusManager:
     def publish_device_update(self, mac_addr, status):
         # use MQTT-CLI to publish the message
-        os.system("mqtt pub -h {} -t device_status_update -m '{} {}'".format(SERVER, mac_addr, status))
+        os.system(
+            "mqtt pub -h {} -t device_status_update -m '{} {}'".format(SERVER, mac_addr, status))
 
 
 mqtt_client = MqttDeviceStatusManager()
+
 
 def init_files_if_not_exists():
     if not os.path.exists("/tmp/arp_table"):
@@ -133,7 +142,9 @@ if __name__ == "__main__":
     init_files_if_not_exists()
 
     observer = Observer()
-    observer.schedule(ArpChangeHandler(), path="/tmp/arp_table", recursive=False) # monitoring /proc/net/arp does not work!
+    # monitoring /proc/net/arp does not work!
+    observer.schedule(ArpChangeHandler(),
+                      path="/tmp/arp_table", recursive=False)
     observer.start()
 
     try:
