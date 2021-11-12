@@ -41,7 +41,12 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "../acl_persistence.py", destination: "~/acl_persistence.py"
   config.vm.provision "file", source: "../get_random_ip.py", destination: "~/get_random_ip.py"
   config.vm.provision "file", source: "../configure_dhcp.py", destination: "~/configure_dhcp.py"
+  config.vm.provision "file", source: "../manage_capabilities.py", destination: "~/manage_capabilities.py"
+  config.vm.provision "file", source: "../add-capability", destination: "~/add-capability"
+  config.vm.provision "file", source: "../remove-capability", destination: "~/remove-capability"
+  config.vm.provision "file", source: "../list-capabilities", destination: "~/list-capabilities"
   config.vm.provision "file", source: "../rules_and_port_generator.py", destination: "~/rules_and_port_generator.py"
+  
 
   #Give execution rights to manually-invoked scripts 
   config.vm.provision "shell", inline: "chmod +x manage_acl.sh"
@@ -72,6 +77,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "dos2unix acl_persistence.py"
   config.vm.provision "shell", inline: "dos2unix get_random_ip.py"
   config.vm.provision "shell", inline: "dos2unix configure_dhcp.py"
+  config.vm.provision "shell", inline: "dos2unix manage_capabilities.py"
+  config.vm.provision "shell", inline: "dos2unix add-capability"
+  config.vm.provision "shell", inline: "dos2unix remove-capability"
+  config.vm.provision "shell", inline: "dos2unix list-capability"
   config.vm.provision "shell", inline: "dos2unix rules_and_port_generator.py"
  
   #Install DHCP server, set up configuration files and start service
