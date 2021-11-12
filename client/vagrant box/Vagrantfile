@@ -80,7 +80,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "dos2unix manage_capabilities.py"
   config.vm.provision "shell", inline: "dos2unix add-capability"
   config.vm.provision "shell", inline: "dos2unix remove-capability"
-  config.vm.provision "shell", inline: "dos2unix list-capability"
+  config.vm.provision "shell", inline: "dos2unix list-capabilities"
   config.vm.provision "shell", inline: "dos2unix rules_and_port_generator.py"
  
   #Install DHCP server, set up configuration files and start service

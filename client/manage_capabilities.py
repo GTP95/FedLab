@@ -114,6 +114,7 @@ def add_capability(ip, device_port, name, desc):
 
 def remove_capability(uuid):
     # TODO: fix this, since ID is no longer there
+
     # cap_directory = read_directory()
     # print(cap_directory['capabilities'])
     #
@@ -126,3 +127,4 @@ def remove_capability(uuid):
     # mqtt_client.publish_capability_update("remove", uuid)
     #
     # write_directory(cap_directory)
+    pass
