@@ -25,7 +25,7 @@ class AclEntry:
     @staticmethod
     def is_valid_entry(line):
         words = line.split()
-        if len(words) != 3:
+        if len(words) != 4:
             return False
 
         ip_regex = r'[0-9]+(?:\.[0-9]+){3}'
