@@ -27,7 +27,7 @@ def addIptablesRules(ipAddress, devicePort, externalPort):
 	#Note: assuming that "echo 1 > /proc/sys/net/ipv4/ip_forward" and "/proc/sys/net/ipv4/conf/eth0/forwarding" do basically the same so not enabling
 	#forwarding here as already enabled in Vagrantfile with "echo 1 > /proc/sys/net/ipv4/ip_forward"
 
-def generatePortAndAddRules():
+def generatePortAndAddRules(deviceIpAddress, devicePort):
 	if not os.geteuid()==0:
     		sys.exit('Error: this script must be run as root')
 	if len(sys.argv)!=3:
@@ -35,8 +35,6 @@ def generatePortAndAddRules():
 		print("Usage: rules_and_port_generator.py device_ip_address capability_port")
 		return
 	externalPort=generatePort()
-	deviceIpAddress=sys.argv[1]
-	devicePort=sys.argv[2]
 	addIptablesRules(deviceIpAddress, devicePort, externalPort)
 	return externalPort
 
