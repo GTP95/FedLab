@@ -23,7 +23,7 @@ ENDING_IP="192.168.5.255"
 LAB_SUBNET_ADAPTER="enp0s20u6"
 
 #In next line, substitute "YOUR_CERTIFICATE.ovpn" with the name of your OpenVPN certificate
-CERT="intersect.ovpn"
+CERT="certificate.ovpn"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
@@ -61,6 +61,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo apt-get -y install python3.9"
   config.vm.provision "shell", inline: "python3.9 -m pip install watchdog"
   config.vm.provision "shell", inline: "python3.9 -m pip install paho-mqtt"
+  config.vm.provision "shell", inline: "sudo python3.9 -m pip install --upgrade python-iptables"	#needs to be installed for the root user, hence sudo
   config.vm.provision "shell", inline: "wget https://github.com/hivemq/mqtt-cli/releases/download/v4.6.2/mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "sudo apt-get -y install ./mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "rm mqtt-cli-4.6.2.deb"
