@@ -23,7 +23,7 @@ ENDING_IP="192.168.5.255"
 LAB_SUBNET_ADAPTER="enp0s20u6"
 
 #In next line, substitute "YOUR_CERTIFICATE.ovpn" with the name of your OpenVPN certificate
-CERT="intersect.ovpn"
+CERT="certificate.ovpn"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
