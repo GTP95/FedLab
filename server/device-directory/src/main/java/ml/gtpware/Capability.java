@@ -3,17 +3,17 @@ package ml.gtpware;
 public class Capability {
     //Not following Java convention to reflect the name of the Json's fields
     String party_name;
-    String device;
+    String gateway_ip;
+    int port;
     String capability_name;
-    String capability_id;
-    String capability_desc;
+    String description;
 
-    public Capability(String party_name, String device, String capability_name, String capability_id, String capability_desc) {
+    public Capability(String party_name, String gateway_ip, int port, String capability_name, String description) {
         this.party_name = party_name;
-        this.device = device;
+        this.gateway_ip = gateway_ip;
+        this.port = port;
         this.capability_name = capability_name;
-        this.capability_id = capability_id;
-        this.capability_desc = capability_desc;
+        this.description = description;
     }
 }
 

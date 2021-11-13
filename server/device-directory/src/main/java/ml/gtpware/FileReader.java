@@ -41,26 +41,29 @@ public class FileReader {
 
     synchronized void reloadFile() throws IOException {
         fileContent= Files.readString(filePath);
-
-        String[] jsonStringsArray=fileContent.split("\n");
+        String[] jsonStringsArray=fileContent.split("}");
         capabilitiesSet.clear();    //Removes all elements before adding the content of the device directory, this way I'm syncing also removal of capabilities
-        for(String json : jsonStringsArray){
-            capabilitiesSet.add(gson.fromJson(json, Capability.class));
+        System.out.println(jsonStringsArray.length);
+        for(int index=0; index<jsonStringsArray.length-1;index++){  //I have to skip the last element as it doesn't contain a json, artifact of string splitting
+            jsonStringsArray[index]+="}";   //Splitting a string like above removes terminating '}', have to add this again
+            //json.concat("}vdvdsv"); //Splitting the string like above removes the closing bracket
+            System.out.println(jsonStringsArray[index]);
+            capabilitiesSet.add(gson.fromJson(jsonStringsArray[index], Capability.class));
         }
 
         //Present the data in a "pretty" way
-        prettyFormattedDeviceDirectoryContent=new String();
+        prettyFormattedDeviceDirectoryContent=new String("");
         for(Capability capability : capabilitiesSet){
-            prettyFormattedDeviceDirectoryContent.concat("Party: " + capability.party_name + "\n" +
-                                                         "Device: " + capability.device + "\n" +
+            prettyFormattedDeviceDirectoryContent+=("Party: " + capability.party_name + "\n" +
+                                                         "Gateway IP: " + capability.gateway_ip + "\n" +
+                                                         "Gateway port: " + capability.port + "\n" +
                                                          "Capability name: " + capability.capability_name + "\n" +
-                                                         "Capability ID:" + capability.capability_id + "\n" +
-                                                         "Capability description: " + capability.capability_desc + "\n\n\n");
+                                                         "Capability description: " + capability.description + "\n\n\n");
         }
 
     }
 
     synchronized String readFile(){
-        return fileContent;
+        return prettyFormattedDeviceDirectoryContent;
     }
 }
