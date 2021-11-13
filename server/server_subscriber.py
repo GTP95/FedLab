@@ -21,7 +21,7 @@ class DeviceDirectoryEntry:
         if not DeviceDirectoryEntry.is_valid_entry(entry):
             raise RuntimeError("Malformed line detected in device_directory")
         words = entry.split()
-        return cls(mac_addr=words[0], status = words[1])
+        return cls(mac_addr=words[0], status=words[1])
 
     @staticmethod
     def is_valid_entry(line):
@@ -30,8 +30,8 @@ class DeviceDirectoryEntry:
             return False
 
         # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
-        mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
-                "{5}([0-9A-Fa-f]{2})")            
+        mac_regex = ("^([0-9A-Fa-f]{2}[:-])"
+                     + "{5}([0-9A-Fa-f]{2})")
         mac_regex_obj = re.compile(mac_regex)
 
         status_regex = "^(online|offline)$"
@@ -47,8 +47,8 @@ class DeviceDirectoryEntry:
     @staticmethod
     def is_valid_update(mac_addr, status):
         # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
-        mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
-                "{5}([0-9A-Fa-f]{2})")            
+        mac_regex = ("^([0-9A-Fa-f]{2}[:-])"
+                     + "{5}([0-9A-Fa-f]{2})")
         mac_regex_obj = re.compile(mac_regex)
 
         status_regex = "^(online|offline)$"
@@ -73,13 +73,13 @@ class AddRemoveMessage:
         words = msg.split()
         if len(words) != 2:
             return False
-        
+
         operation_regex = "^(A|D)"
         operation_regex_obj = re.compile(operation_regex)
 
         # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
-        mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
-                "{5}([0-9A-Fa-f]{2})")            
+        mac_regex = ("^([0-9A-Fa-f]{2}[:-])"
+                     + "{5}([0-9A-Fa-f]{2})")
         mac_regex_obj = re.compile(mac_regex)
 
         if not re.search(operation_regex_obj, words[0]):
@@ -103,8 +103,8 @@ class DeviceStatusMessage:
             return False
 
         # courtesy of https://www.geeksforgeeks.org/how-to-validate-mac-address-using-regular-expression/
-        mac_regex = ("^([0-9A-Fa-f]{2}[:-])" +
-                "{5}([0-9A-Fa-f]{2})")            
+        mac_regex = ("^([0-9A-Fa-f]{2}[:-])"
+                     + "{5}([0-9A-Fa-f]{2})")
         mac_regex_obj = re.compile(mac_regex)
 
         status_regex = "^(online|offline)$"
@@ -130,13 +130,13 @@ class MqttAclManager:
         # dispatching callbacks and reconnecting in case of disconnects
         client.loop_forever()
 
-    # reads the existing acl from the file, clears it, and then writes the new acl, 
+    # reads the existing acl from the file, clears it, and then writes the new acl,
     # which is the old acl with the specified operation applied to it
     # TODO: maybe make backup of old ACL in case something goes wrong while writing
     def handle_acl_update(self, msg):
         init_file_if_not_exists()
 
-        try: 
+        try:
             msg = AddRemoveMessage(msg.payload.decode("utf-8"))
         except RuntimeError as e:
             print("Error: {}".format(e))
@@ -147,19 +147,29 @@ class MqttAclManager:
             device_directory = self.construct_dict_from_file(file)
 
         if (msg.operation == OPERATION_ADD):
-            device_directory[msg.mac_addr] = DeviceDirectoryEntry(msg.mac_addr, "offline")
+            device_directory[msg.mac_addr] = DeviceDirectoryEntry(
+                msg.mac_addr, "offline")
         elif (msg.operation == OPERATION_DELETE):
             del device_directory[msg.mac_addr]
 
         suffix = '\n' if len(device_directory) > 0 else ''
         with open("device_directory", 'w') as file:
-            file.write('\n'.join(map(lambda x: str(x), device_directory.values())) + suffix)
+            file.write(
+                '\n'.join(map(lambda x: str(x), device_directory.values())) + suffix)
 
+    def handle_capability_update(self, msg):
+        init_file_if_not_exists()
+
+        # TODO: some validation
+
+        # TODO: differentiate between add and remove
+        with open("device_directory", 'a') as file:
+            file.writelines(msg + '\n')
 
     def handle_device_status_update(self, msg):
         init_file_if_not_exists()
 
-        try: 
+        try:
             msg = DeviceStatusMessage(msg.payload.decode("utf-8"))
         except RuntimeError as e:
             print("Error: {}".format(e))
@@ -180,11 +190,12 @@ class MqttAclManager:
 
         suffix = '\n' if len(device_directory) > 0 else ''
         with open("device_directory", 'w') as file:
-            file.write('\n'.join(map(lambda x: str(x), device_directory.values())) + suffix)
+            file.write(
+                '\n'.join(map(lambda x: str(x), device_directory.values())) + suffix)
 
     # called when a CONNACK is received from the server, i.e. when a connection has been established
     def on_connect(self, client, userdata, flags, rc, fifth_argument):
-        if rc==0:
+        if rc == 0:
             print("Connected successfully")
         else:
             print("Connection attempt failed")
@@ -197,19 +208,22 @@ class MqttAclManager:
     # called when a relevant PUB message is received from the broker
     def on_message(self, client, userdata, msg):
         print(msg.topic+" "+str(msg.payload))
-        
+
         if msg.topic == "aclUpdate":
             self.handle_acl_update(msg)
 
         if msg.topic == "device_status_update":
             self.handle_device_status_update(msg)
 
+        if msg.topic == "capability_update":
+            self.handle_capability_update(msg)
+
     # makes a set consisting of each line in file
     def construct_dict_from_file(self, file):
         output_dict = dict[str, DeviceDirectoryEntry]()
 
         for line in file:
-            try: 
+            try:
                 entry = DeviceDirectoryEntry.from_str(line.strip('\n'))
                 output_dict[entry.mac_addr] = entry
             except RuntimeError as e:
@@ -229,14 +243,15 @@ if __name__ == "__main__":
 
     init_file_if_not_exists()
 
-    parser = argparse.ArgumentParser(description="MQTT subscriber for the INTERSCT Federated Lab server")
+    parser = argparse.ArgumentParser(
+        description="MQTT subscriber for the INTERSCT Federated Lab server")
 
     parser.add_argument("-s", "--server", metavar="server_identifier", type=str, default="localhost",
-        help="The identifier for the device on which the MQTT broker runs.\
+                        help="The identifier for the device on which the MQTT broker runs.\
             This may be a hostname, URL or IP address (defaults to localhost)")
 
     parser.add_argument("-p", "--port", metavar="broker_port", type=int, default=1883,
-        help="The port used by the MQTT broker (defaults to 1883)")
+                        help="The port used by the MQTT broker (defaults to 1883)")
 
     args = parser.parse_args()
 

@@ -24,7 +24,6 @@
 
 import json
 import os
-import uuid
 from rules_and_port_generator import generatePortAndAddRules
 
 
@@ -107,7 +106,8 @@ def add_capability(ip, device_port, name, desc):
 
     remote_capability = construct_remote_capability_object(
         name, desc, gateway_port)
-    mqtt_client.publish_capability_update("add", json.dumps(remote_capability))
+    mqtt_client.publish_capability_update(
+        "add", json.dumps(remote_capability, indent=2))
 
     write_directory(cap_directory)
 
