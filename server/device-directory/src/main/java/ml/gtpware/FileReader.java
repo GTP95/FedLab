@@ -1,5 +1,6 @@
 package ml.gtpware;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -25,7 +26,11 @@ public class FileReader {
         this.gson=new Gson();
         this.filePath=Path.of("/server-subscriber/device_directory");
         try {
-            this.fileContent=Files.readString(filePath);
+            File file=new File("/server-subscriber/device_directory");
+            if(file.exists() && file.length()!=0){
+                reloadFile();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,13 +57,13 @@ public class FileReader {
         }
 
         //Present the data in a "pretty" way
-        prettyFormattedDeviceDirectoryContent=new String("");
+        prettyFormattedDeviceDirectoryContent=new String();
         for(Capability capability : capabilitiesSet){
             prettyFormattedDeviceDirectoryContent+=("Party: " + capability.party_name + "\n" +
-                                                         "Gateway IP: " + capability.gateway_ip + "\n" +
-                                                         "Gateway port: " + capability.port + "\n" +
-                                                         "Capability name: " + capability.capability_name + "\n" +
-                                                         "Capability description: " + capability.description + "\n\n\n");
+                                                         "\tGateway IP: " + capability.gateway_ip + "\n" +
+                                                         "\tGateway port: " + capability.port + "\n" +
+                                                         "\tCapability name: " + capability.capability_name + "\n" +
+                                                         "\tCapability description: " + capability.description + "\n\n\n");
         }
 
     }
