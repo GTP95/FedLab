@@ -68,13 +68,7 @@ elif [ "$1" = 'remove' ]
 
   	# Remove the device from the DHCP allow-list
     cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
-    WORDS=$(cat MAC_addresses)
-    for WORD in $WORDS
-    do
-        if [[ $WORD =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
-            then echo -e "\nhost device-`uuidgen` {\n  hardware ethernet $WORD;\n}" >> /etc/dhcp/dhcpd.conf;
-        fi
-    done
+    ./configure_dhcp.py
     sudo systemctl restart isc-dhcp-server
 
     mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROKER"
