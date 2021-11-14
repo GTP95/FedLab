@@ -1,7 +1,3 @@
-#!/usr/bin/python
-
-# To run: sudo manage_capabilities.sh add/remove <MAC_ADDR> <PORT> <CAPABILITY_NAME> <CAPABILITY_DESC>
-
 # Example of the format:
 # {
 #   'capabilities': [
@@ -36,12 +32,11 @@ GATEWAY_IP = "192.168.5.1"  # configure this
 
 
 class MqttCapabilityUpdateManager:
-    def publish_capability_update(self, operation, capability_string):
+    def publish_capability_add(self, capability_string):
         # use MQTT-CLI to publish the message
-        # os.system("mqtt pub -h {} -t capability_update -m '{} {}'".format(SERVER, operation, capability_string))
-        print("\nmqtt pub -h {} -t capability_update -m '{} {}'\n".format(
+        # os.system("mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
+        print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
             SERVER,
-            operation,
             capability_string
         ))
 
@@ -81,7 +76,8 @@ def construct_local_capability_object(ip, gateway_port, device_port, name, desc)
            "gateway_port": gateway_port,
            "device_port": device_port,
            "capability_name": name,
-           "description": desc
+           "description": desc,
+           "is_capability": True
          }
 
 
@@ -89,9 +85,32 @@ def construct_remote_capability_object(name, desc, port):
     return {
            "party_name": OPENVPN_CLIENT_NAME,
            "gateway_ip": GATEWAY_IP,
-           "port": port,
+           "gateway_port": port,
            "capability_name": name,
-           "description": desc
+           "description": desc,
+           "is_capability": True
+         }
+
+
+def construct_local_device_object(device_ip, name):
+    return {
+           "device": device_ip,
+           "gateway_port": None,
+           "device_port": None,
+           "capability_name": name,
+           "description": None,
+           "is_capability": False
+         }
+
+
+def construct_remote_device_object(device_ip, name):
+    return {
+           "party_name": OPENVPN_CLIENT_NAME,
+           "gateway_ip": device_ip,
+           "gateway_port": None,
+           "capability_name": name,
+           "description": None,
+           "is_capability": False
          }
 
 
@@ -101,13 +120,13 @@ def add_capability(ip, device_port, name, desc):
     gateway_port = generatePortAndAddRules(ip, device_port)
 
     new_capability = construct_local_capability_object(
-        ip, gateway_port, device_port, name, desc)
+        ip, str(gateway_port), device_port, name, desc)
     cap_directory["capabilities"].append(new_capability)
 
     remote_capability = construct_remote_capability_object(
-        name, desc, gateway_port)
-    mqtt_client.publish_capability_update(
-        "add", json.dumps(remote_capability, indent=2))
+        name, desc, str(gateway_port))
+    mqtt_client.publish_capability_add(
+        json.dumps(remote_capability, indent=2))
 
     write_directory(cap_directory)
 
@@ -127,4 +146,24 @@ def remove_capability(uuid):
     # mqtt_client.publish_capability_update("remove", uuid)
     #
     # write_directory(cap_directory)
+    pass
+
+
+def add_device(ip, name):
+    cap_directory = read_directory()
+
+    new_device = construct_local_device_object(
+        ip, name)
+    cap_directory["capabilities"].append(new_device)
+
+    remote_device = construct_remote_device_object(
+        ip, name)
+    mqtt_client.publish_capability_add(
+        json.dumps(remote_device, indent=2))
+
+    write_directory(cap_directory)
+
+
+def remove_device():
+    # TODO
     pass
