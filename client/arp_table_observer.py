@@ -95,8 +95,8 @@ class ArpChangeHandler(FileSystemEventHandler):
                 acl[mac_addr].last_used = current_time
                 if entry.status == "offline":
                     acl[mac_addr].status = "online"
-                    mqtt_client.publish_device_update(
-                        acl[mac_addr].mac_addr, "online")
+                    # mqtt_client.publish_device_update(
+                    # acl[mac_addr].mac_addr, "online")
 
             # If a registered MAC address was not found in the ARP table and
             # has not been connected for at least TTL seconds, remove it from the list.
@@ -109,8 +109,8 @@ class ArpChangeHandler(FileSystemEventHandler):
             else:
                 if acl[mac_addr].status == "online":
                     acl[mac_addr].status = "offline"
-                    mqtt_client.publish_device_update(
-                        acl[mac_addr].mac_addr, "offline")
+                    # mqtt_client.publish_device_update(
+                    # acl[mac_addr].mac_addr, "offline")
 
         suffix = '\n' if len(acl) > 0 else ''
         with open("MAC_addresses", 'w') as file:
