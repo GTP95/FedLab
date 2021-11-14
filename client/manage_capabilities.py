@@ -27,8 +27,20 @@ from rules_and_port_generator import generatePortAndAddRules
 TTL = 14*24*60*60
 SERVER = "10.0.2.2"
 PORT = 1883
-OPENVPN_CLIENT_NAME = "INTERSECT2"  # configure this
-GATEWAY_IP = "192.168.5.1"  # configure this
+OPENVPN_CLIENT_NAME = ""
+GATEWAY_IP = ""
+
+# Get the gateway ip from the dhcpd.conf file
+file = open("/etc/dhcp/dhcpd.conf", "r")
+for line in file:
+    if " option routers" in line:
+        GATEWAY_IP = line[17:-2] 
+file.close()
+
+# Get the client name, which is the same as the ...ovpn file
+for file in os.listdir("/home/vagrant"):
+    if file.endswith(".ovpn"):
+        OPENVPN_CLIENT_NAME = file[:-5]
 
 
 class MqttCapabilityUpdateManager:
