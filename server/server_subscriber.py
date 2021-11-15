@@ -157,12 +157,11 @@ class MqttAclManager:
             file.write(
                 '\n'.join(map(lambda x: str(x), device_directory.values())) + suffix)
 
-    def handle_capability_update(self, msg):
+    def handle_capability_add(self, msg):
         init_file_if_not_exists()
 
         # TODO: some validation
 
-        # TODO: differentiate between add and remove
         with open("device_directory", 'a') as file:
             file.writelines(msg + '\n')
 
@@ -215,8 +214,8 @@ class MqttAclManager:
         if msg.topic == "device_status_update":
             self.handle_device_status_update(msg)
 
-        if msg.topic == "capability_update":
-            self.handle_capability_update(msg)
+        if msg.topic == "capability_add":
+            self.handle_capability_add(msg)
 
     # makes a set consisting of each line in file
     def construct_dict_from_file(self, file):

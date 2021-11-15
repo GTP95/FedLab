@@ -26,7 +26,7 @@ fi
 file_name="MAC_addresses"
 touch $file_name
 
-IP_BROKER="192.168.201.2"
+IP_RANGE=$(grep range /etc/dhcp/dhcpd.conf | cut -c 9- | rev | cut -c 2- | rev)
 
 CURRENT_TIME=$(date +%s)
 
@@ -42,10 +42,9 @@ else
 fi
 
 # Determine if the first argument has been set correctly
-# TODO: Does MQTT also need the timestamp (probably not)
 if [ "$1" = 'add' ]
     then echo "Added"
-    IP_ADDR=`./get_random_ip.py 192.168.3.2 192.168.5.255`
+    IP_ADDR=`./get_random_ip.py $IP_RANGE`
     # Add mac addresses to the file
     echo "$IP_ADDR $NEW_MAC $CURRENT_TIME offline" >> $file_name
 
@@ -53,8 +52,6 @@ if [ "$1" = 'add' ]
     cp /etc/dhcp/dhcpd_base.conf /etc/dhcp/dhcpd.conf
     ./configure_dhcp.py
     sudo systemctl restart isc-dhcp-server
-
-    mqtt pub --topic "aclUpdate" --message "A $NEW_MAC" -h "$IP_BROKER"
 
     # TODO: Rules can now be double created if the user is not paying attention, this might not be an issue
     # Create a rule such that OUT going packets are from a registered IoT device
@@ -71,7 +68,6 @@ elif [ "$1" = 'remove' ]
     ./configure_dhcp.py
     sudo systemctl restart isc-dhcp-server
 
-    mqtt pub --topic "aclUpdate" --message "D $NEW_MAC" -h "$IP_BROKER"
     # Find line numbers of the specific rules and delete them
     # Get all the arptables with their line numbers
     # Only show that paragraph
