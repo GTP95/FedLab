@@ -25,9 +25,12 @@ def isAvailable(port):
     return True
 
 def generatePort():
-    port=random.randrange(1024, 65535+1)	    
-    if isAvailable(port):
-        return port
+    isValid=False
+    while(not isValid):
+    	port=random.randrange(1024, 65535+1)	    
+    	if isAvailable(port):
+            isValid=True
+    return port
 
 
 def addIptablesRules(ipAddress, devicePort, externalPort):
