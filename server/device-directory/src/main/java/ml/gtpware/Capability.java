@@ -6,16 +6,18 @@ public class Capability implements Comparable<Capability>{
     //Not following Java convention to reflect the name of the Json's fields
     String party_name;
     String gateway_ip;
-    int port;
+    int gateway_port;
     String capability_name;
     String description;
+    boolean is_capability;
 
-    public Capability(String party_name, String gateway_ip, int port, String capability_name, String description) {
+    public Capability(String party_name, String gateway_ip, int port, String capability_name, String description, boolean is_capability) {
         this.party_name = party_name;
         this.gateway_ip = gateway_ip;
-        this.port = port;
+        this.gateway_port = port;
         this.capability_name = capability_name;
         this.description = description;
+        this.is_capability=is_capability;
     }
 
     @Override
@@ -26,8 +28,8 @@ public class Capability implements Comparable<Capability>{
         else{   //Same party_name
             if(this.capability_name.compareTo(capability.capability_name)<0) return -1;
             else if(this.capability_name.compareTo(capability.capability_name)>0) return 1;
-            else {  //Same party_name and capability_name
-                if(this.port>capability.port) return 1;
+            else {  //Same party_name and capability_name. This shouldn't happen for devices so it is "safe" to leave it this way
+                if(this.gateway_port>capability.gateway_port) return 1;
                 else return 0;
             }
         }
@@ -38,12 +40,12 @@ public class Capability implements Comparable<Capability>{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Capability that = (Capability) o;
-        return port == that.port && party_name.equals(that.party_name) && gateway_ip.equals(that.gateway_ip) && capability_name.equals(that.capability_name) && description.equals(that.description);
+        return gateway_port == that.gateway_port && is_capability == that.is_capability && party_name.equals(that.party_name) && gateway_ip.equals(that.gateway_ip) && capability_name.equals(that.capability_name) && Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(party_name, gateway_ip, port, capability_name, description);
+        return Objects.hash(party_name, gateway_ip, gateway_port, capability_name, description, is_capability);
     }
 }
 
