@@ -7,7 +7,7 @@ public class CapabilityDirectoryContainer {
     private ArrayList<String> capabilitiesParties, devicesParties;
 
 
-    public void CapabilityDirectoryContainer(){
+    public CapabilityDirectoryContainer(){
         capabilities=new ArrayList<ArrayList<Capability>>();
         devices=new ArrayList<ArrayList<Capability>>();
         capabilitiesParties=new ArrayList<>();
@@ -19,6 +19,7 @@ public class CapabilityDirectoryContainer {
             capabilities.add(new ArrayList<Capability>());
             ((ArrayList<Capability>)capabilities.get(0)).add(capability);
             capabilitiesParties.add(capability.party_name);
+            return;
         }
         if(capabilitiesParties.contains(capability.party_name)){
             for(Object arrayList : capabilities){
@@ -40,6 +41,7 @@ public class CapabilityDirectoryContainer {
             devices.add(new ArrayList<Capability>());
             ((ArrayList<Capability>)devices.get(0)).add(device);
             devicesParties.add(device.party_name);
+            return;
         }
         if(devicesParties.contains(device.party_name)){
             for(Object arrayList : devices){
@@ -59,15 +61,27 @@ public class CapabilityDirectoryContainer {
         String string=new String("CAPABILITIES:\n");
         for(Object arrayList : capabilities){
                 string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"\n";
-                for(Capability capability1 : (ArrayList<Capability>)arrayList){
-                    string+=("\t"+"Capability name: "+capability1.capability_name+"\n" +
-                            "\t"+"Capability description: "+capability1.description+"\n"+
-                            "\t"+"Gateway IP: "+capability1.gateway_ip+"\n" +
-                            "\t"+"Gateway port: "+capability1.gateway_port+"\n\n");
+                for(Capability capability : (ArrayList<Capability>)arrayList){
+                    string+=("\t"+"Capability name: "+capability.capability_name+"\n" +
+                            "\t"+"Capability description: "+capability.description+"\n"+
+                            "\t"+"Gateway IP: "+capability.gateway_ip+"\n" +
+                            "\t"+"Gateway port: "+capability.gateway_port+"\n\n");
                 }
             }
         return string;
 
+    }
+
+    public String prettyFormattedDevices(){
+        String string=new String("DEVICES:\n");
+        for(Object arrayList : devices){
+            string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"\n";
+            for(Capability capability : (ArrayList<Capability>)arrayList){
+                string+=("\t"+"Device name: "+capability.capability_name+"\n" +
+                        "\t"+"Device IP: "+capability.gateway_ip+"\n\n");
+            }
+        }
+        return string;
     }
 
 }
