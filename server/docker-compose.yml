@@ -32,6 +32,7 @@ services:
     build: .
     ports:
       - "1024:1024/tcp"
+      - "80:80/tcp"
     networks:
       intersect_docker_network:
         ipv4_address: 192.168.201.3
