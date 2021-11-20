@@ -13,7 +13,7 @@ public class HTMLGenerator {
         String html="<!DOCTYPE><html><head><title>"+escapedTitle+"</title></head><body>"+escapedCapabilities+
                 escapedDevices+ "</body></html>";
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false));    //Write to file, overwrite instead of appending
         writer.write(html);
         writer.close();
     }
