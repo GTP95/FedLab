@@ -25,6 +25,12 @@
             <artifactId>jfiglet</artifactId>
             <version>0.0.8</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.4</version>
+        </dependency>
     </dependencies>
 
 
