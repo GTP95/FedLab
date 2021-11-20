@@ -9,6 +9,9 @@ ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 RUN apt-get -y update && apt-get -y install openjdk-11-jdk
 ENV PATH=$PATH:${JAVA_HOME}/bin
 
+# Install web server
+RUN apt-get -y install apache2
+
 # Copy the needed software
 COPY server_subscriber.py /server-subscriber/server_subscriber.py
 ARG src="device-directory/out/artifacts/Device_Directory_jar/Device Directory.jar"
