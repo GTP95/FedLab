@@ -3,6 +3,9 @@
     <output-path>$PROJECT_DIR$/out/artifacts/Device_Directory_jar</output-path>
     <root id="archive" name="Device Directory.jar">
       <element id="module-output" name="Device Directory" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/main/java/META-INF/MANIFEST.MF" />
+      </element>
     </root>
   </artifact>
 </component>
