@@ -40,7 +40,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Main.class</mainClass>
+                            <mainClass>ml.gtpware.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
