@@ -38,6 +38,17 @@ services:
         ipv4_address: 192.168.201.3
     restart: unless-stopped
 
+  netbox:
+    container_name: netbox
+    image: netboxcommunity/netbox
+    ports:
+      - 8000:8080
+    networks:
+      intersect_docker_network:
+        ipv4_address: 192.168.201.5
+      restart: unless-stopped
+
+
 networks:
   intersect_docker_network:
     driver: bridge
