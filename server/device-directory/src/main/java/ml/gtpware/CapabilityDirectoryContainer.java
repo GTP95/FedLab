@@ -77,8 +77,12 @@ public class CapabilityDirectoryContainer {
         for(Object arrayList : devices){
             string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"\n";
             for(Capability capability : (ArrayList<Capability>)arrayList){
+                if(capability.description==null)
                 string+=("\t"+"Device name: "+capability.capability_name+"\n" +
                         "\t"+"Device IP: "+capability.gateway_ip+"\n\n");
+                else
+                    string+=("\t"+"Device name: "+capability.capability_name+"\n" +
+                            "\t"+"Device IP: "+capability.gateway_ip+"\n"+"Description: "+capability.description+"\n\n");
             }
         }
         return string;
