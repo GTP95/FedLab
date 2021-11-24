@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "../remove-capability.py", destination: "~/remove-capability.py"
   config.vm.provision "file", source: "../list-capabilities.py", destination: "~/list-capabilities.py"
   config.vm.provision "file", source: "../rules_and_port_generator.py", destination: "~/rules_and_port_generator.py"
-  
+  config.vm.provision "file", source: "../get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py" 
 
   #Give execution rights to manually-invoked scripts 
   config.vm.provision "shell", inline: "chmod +x manage_acl.sh"
@@ -56,6 +56,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "chmod +x add-capability.py"
   config.vm.provision "shell", inline: "chmod +x remove-capability.py"
   config.vm.provision "shell", inline: "chmod +x list-capabilities.py" 
+  config.vm.provision "shell", inline: "chmod +x get_subnet_from_netbox.py"
 
   #Update VM, install OpenVPN, dos2unix, python3.9 and scripts' dependencies
   config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
@@ -64,6 +65,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo apt-get -y install python3.9"
   config.vm.provision "shell", inline: "python3.9 -m pip install watchdog"
   config.vm.provision "shell", inline: "python3.9 -m pip install paho-mqtt"
+  config.vm.provision "shell", inline: "python3.9 -m pip install requests"
   config.vm.provision "shell", inline: "wget https://github.com/hivemq/mqtt-cli/releases/download/v4.6.2/mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "sudo apt-get -y install ./mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "rm mqtt-cli-4.6.2.deb"
