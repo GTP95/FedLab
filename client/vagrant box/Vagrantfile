@@ -53,7 +53,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "chmod +x query_capabilities_directory.sh"
   config.vm.provision "shell", inline: "chmod +x get_random_ip.py"
   config.vm.provision "shell", inline: "chmod +x configure_dhcp.py"
- 
+  config.vm.provision "shell", inline: "chmod +x add-capability.py"
+  config.vm.provision "shell", inline: "chmod +x remove-capability.py"
+  config.vm.provision "shell", inline: "chmod +x list-capabilities.py" 
+
   #Update VM, install OpenVPN, dos2unix, python3.9 and scripts' dependencies
   config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
   config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip"
