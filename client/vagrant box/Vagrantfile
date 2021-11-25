@@ -5,20 +5,6 @@
 #i.e. please use a subnet that is not in use.
 VM_IP="192.168.5.1"
 
-#In the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
-IP_RANGE="131.155.68.1/22"
-
-#In the next line, substitute 192.168.5.0 with the IP of the subnet you wish to create to connect the devices or leave as is to use default
-SUBNET_IP="192.168.5.0"
-
-#In the next line, substitute 255.255.255.0 with the netmask of the subnet you wish to create to connect the devices or leave as is to use default
-NETMASK="255.255.255.0"
-
-#The next two lines define the range of IPs used by the DHCP server of the network created to connect the devices. The first is the starting IP, the second is
-#the last IP. Change to specify the range you wish to use, or leave as is to use defaults.
-STARTING_IP="192.168.5.2"
-ENDING_IP="192.168.5.255"
-
 #In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use to connect the Gateway to WAN (probably your pre-existing LAN)
 LAB_SUBNET_ADAPTER="enp0s20u6"
 
@@ -87,13 +73,11 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "dos2unix remove-capability.py"
   config.vm.provision "shell", inline: "dos2unix list-capabilities.py"
   config.vm.provision "shell", inline: "dos2unix rules_and_port_generator.py"
+  config.vm.provision "shell", inline: "dos2unix get_subnet_from_netbox.py"
  
   #Install DHCP server, set up configuration files and start service
   config.vm.provision "shell", inline: "sed -i '15s/192.168.5.1/#{VM_IP}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '13s/192.168.5.0/#{SUBNET_IP}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '13s/255.255.255.0/#{NETMASK}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '14s/192.168.5.2/#{STARTING_IP}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '14s/192.168.5.255/#{ENDING_IP}/' dhcpd.conf"
+  config.vm.provision "shell", inline: "python3.9 get_subnet_from_netbox.py"
   config.vm.provision "shell", inline: "sudo apt-get -y install isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo mv dhcpd.conf /etc/dhcp/dhcpd.conf"
   config.vm.provision "shell", inline: "sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd_base.conf"
