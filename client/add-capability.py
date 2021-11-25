@@ -20,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--name", metavar="capability_name", type=str, required=True,
                         help="The name of the capability as it will show up in the capability directory.")
 
-    parser.add_argument("-d", "--description", metavar="capability_desc", type=str, required=True,
+    parser.add_argument("-d", "--desc", metavar="capability_desc", type=str, required=True,
                         help="The description of the capability as it will show up in the capability directory.")
 
     args = parser.parse_args()

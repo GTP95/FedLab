@@ -34,12 +34,12 @@ GATEWAY_IP = ""
 file = open("/etc/dhcp/dhcpd.conf", "r")
 for line in file:
     if " option routers" in line:
-        GATEWAY_IP = line[17:-2] 
+        GATEWAY_IP = line[17:-2]
 file.close()
 
 # Get the party nickname
-f=open("/home/vagrant/partynickname.txt", "r")
-partyNickname=f.readline()
+f = open("/home/vagrant/partynickname.txt", "r")
+partyNickname = f.readline()
 f.close
 
 
@@ -104,24 +104,24 @@ def construct_remote_capability_object(name, desc, port):
          }
 
 
-def construct_local_device_object(device_ip, name):
+def construct_local_device_object(device_ip, name, desc):
     return {
            "device": device_ip,
            "gateway_port": None,
            "device_port": None,
            "capability_name": name,
-           "description": None,
+           "description": desc,
            "is_capability": False
          }
 
 
-def construct_remote_device_object(device_ip, name):
+def construct_remote_device_object(device_ip, name, desc):
     return {
            "party_name": partyNickname,
            "gateway_ip": device_ip,
            "gateway_port": None,
            "capability_name": name,
-           "description": None,
+           "description": desc,
            "is_capability": False
          }
 
@@ -161,15 +161,15 @@ def remove_capability(uuid):
     pass
 
 
-def add_device(ip, name):
+def add_device(ip, name, desc):
     cap_directory = read_directory()
 
     new_device = construct_local_device_object(
-        ip, name)
+        ip, name, desc)
     cap_directory["capabilities"].append(new_device)
 
     remote_device = construct_remote_device_object(
-        ip, name)
+        ip, name, desc)
     mqtt_client.publish_capability_add(
         json.dumps(remote_device, indent=2))
 
