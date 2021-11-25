@@ -1,5 +1,9 @@
 ### CONFIGURATION PARAMETERS ###
 
+#Pick a nickname that will be showed as your party name on the FedLab directory.
+PARTY_NICKNAME=""
+
+#Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
 PARTY_SLUG_FROM_NETBOX=""
 #In the next line, change 192.168.5.1 to the IP you want the gateway to use.
 #WARNING: make sure the IP you choose does not interfere with any existing networks,

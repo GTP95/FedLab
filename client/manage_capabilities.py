@@ -27,7 +27,7 @@ from rules_and_port_generator import generatePortAndAddRules
 TTL = 14*24*60*60
 SERVER = "10.0.2.2"
 PORT = 1883
-OPENVPN_CLIENT_NAME = ""
+partyNickname = ""
 GATEWAY_IP = ""
 
 # Get the gateway ip from the dhcpd.conf file
@@ -37,10 +37,10 @@ for line in file:
         GATEWAY_IP = line[17:-2] 
 file.close()
 
-# Get the client name, which is the same as the ...ovpn file
-for file in os.listdir("/home/vagrant"):
-    if file.endswith(".ovpn"):
-        OPENVPN_CLIENT_NAME = file[:-5]
+# Get the party nickname
+f=open("/home/vagrant/partynickname.txt", "r")
+partyNickname=f.readline()
+f.close
 
 
 class MqttCapabilityUpdateManager:
@@ -95,7 +95,7 @@ def construct_local_capability_object(ip, gateway_port, device_port, name, desc)
 
 def construct_remote_capability_object(name, desc, port):
     return {
-           "party_name": OPENVPN_CLIENT_NAME,
+           "party_name": partyNickname,
            "gateway_ip": GATEWAY_IP,
            "gateway_port": port,
            "capability_name": name,
@@ -117,7 +117,7 @@ def construct_local_device_object(device_ip, name):
 
 def construct_remote_device_object(device_ip, name):
     return {
-           "party_name": OPENVPN_CLIENT_NAME,
+           "party_name": partyNickname,
            "gateway_ip": device_ip,
            "gateway_port": None,
            "capability_name": name,
