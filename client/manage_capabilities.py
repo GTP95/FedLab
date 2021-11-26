@@ -46,11 +46,11 @@ f.close
 class MqttCapabilityUpdateManager:
     def publish_capability_add(self, capability_string):
         # use MQTT-CLI to publish the message
-        # os.system("mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
-        print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
-            SERVER,
-            capability_string
-        ))
+        os.system("mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
+        # print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
+        #    SERVER,
+        #    capability_string
+        #))
 
 
 mqtt_client = MqttCapabilityUpdateManager()
