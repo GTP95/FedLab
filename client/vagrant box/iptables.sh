@@ -23,11 +23,11 @@ iptables -A OUTPUT -j ACCEPT
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # allow TUN such that the VPN connection works
-iptables -A INPUT -i tun+ -j ACCEPT
-iptables -A FORWARD -i tun+ -j ACCEPT
-iptables -A FORWARD -o tun+ -j ACCEPT
-iptables -t nat -A POSTROUTING -o tun+ -j MASQUERADE
-iptables -A OUTPUT -o tun+ -j ACCEPT
+iptables -A INPUT -i tun0 -j ACCEPT
+iptables -A FORWARD -i tun0 -j ACCEPT
+iptables -A FORWARD -o tun0 -j ACCEPT
+#iptables -t nat -A POSTROUTING -o tun+ -j MASQUERADE
+iptables -A OUTPUT -o tun0 -j ACCEPT
 
 # allow VPN connection
 iptables -I OUTPUT -p udp --destination-port 1194 -m comment --comment "Allow VPN connection" -j ACCEPT
