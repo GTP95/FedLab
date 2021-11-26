@@ -38,7 +38,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "../list-capabilities.py", destination: "~/list-capabilities.py"
   config.vm.provision "file", source: "../rules_and_port_generator.py", destination: "~/rules_and_port_generator.py"
   config.vm.provision "file", source: "../get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py" 
-  config.vm.provision "file", source: "../client/sniff-capability/target/sniff-capability-1.0-SNAPSHOT-jar-with-dependencies.jar", destination: "~/sniff-capability.jar"
+  config.vm.provision "file", source: "../sniff-capability/target/sniff-capability-1.0-SNAPSHOT-jar-with-dependencies.jar", destination: "~/sniff-capability.jar"
 
   #Give execution rights to manually-invoked scripts 
   config.vm.provision "shell", inline: "chmod +x manage_acl.sh"
