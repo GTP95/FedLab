@@ -7,7 +7,7 @@ import java.net.ServerSocket;
 public class Main {
     private static int port;
     private static String iface;
-    public static void Main(String[] args){
+    public static void main(String[] args){
         if(args.length!=2){
             System.out.println("Usage: sniff-capability.jar interfaceToSniff listenPort");
             return;

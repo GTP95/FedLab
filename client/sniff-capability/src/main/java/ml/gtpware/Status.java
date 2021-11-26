@@ -19,7 +19,7 @@ public class Status {
    }
 
    public static Status getInstance(){
-       if(instance.equals(null)) instance=new Status();
+       if(instance==null) instance=new Status();
        return instance;
    }
 
