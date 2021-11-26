@@ -1,23 +1,14 @@
 ### CONFIGURATION PARAMETERS ###
 
+#Pick a nickname that will be showed as your party name on the FedLab directory.
+PARTY_NICKNAME=""
+
+#Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
+PARTY_SLUG_FROM_NETBOX=""
 #In the next line, change 192.168.5.1 to the IP you want the gateway to use.
 #WARNING: make sure the IP you choose does not interfere with any existing networks,
 #i.e. please use a subnet that is not in use.
 VM_IP="192.168.5.1"
-
-#In the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
-IP_RANGE="131.155.68.1/22"
-
-#In the next line, substitute 192.168.5.0 with the IP of the subnet you wish to create to connect the devices or leave as is to use default
-SUBNET_IP="192.168.5.0"
-
-#In the next line, substitute 255.255.255.0 with the netmask of the subnet you wish to create to connect the devices or leave as is to use default
-NETMASK="255.255.255.0"
-
-#The next two lines define the range of IPs used by the DHCP server of the network created to connect the devices. The first is the starting IP, the second is
-#the last IP. Change to specify the range you wish to use, or leave as is to use defaults.
-STARTING_IP="192.168.5.2"
-ENDING_IP="192.168.5.255"
 
 #In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use to connect the Gateway to WAN (probably your pre-existing LAN)
 LAB_SUBNET_ADAPTER="enp0s20u6"
@@ -28,11 +19,13 @@ CERT="certificate.ovpn"
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
   config.vm.network "public_network", ip: VM_IP, bridge: LAB_SUBNET_ADAPTER
-  
+
   #Copy all the needed scripts inside the VM
   config.vm.provision "file", source: "iptables.sh", destination: "~/iptables.sh"
   config.vm.provision "file", source: "../manage_acl.sh", destination: "~/manage_acl.sh"
   config.vm.provision "file", source: "../query_capabilities_directory.sh", destination: "~/query_capabilities_directory.sh"
+  config.vm.provision "file", source: "../put_manual.sh", destination: "~/put_manual.sh"
+  config.vm.provision "file", source: "../get_manual.sh", destination: "~/get_manual.sh"
   config.vm.provision "file", source: "../arp_table_observer.py", destination: "~/arp_table_observer.py"
   config.vm.provision "file", source: "../init.sh", destination: "~/init.sh"
   config.vm.provision "file", source: CERT, destination: "~/#{CERT}"
@@ -42,29 +35,36 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "../get_random_ip.py", destination: "~/get_random_ip.py"
   config.vm.provision "file", source: "../configure_dhcp.py", destination: "~/configure_dhcp.py"
   config.vm.provision "file", source: "../manage_capabilities.py", destination: "~/manage_capabilities.py"
-  config.vm.provision "file", source: "../add-capability", destination: "~/add-capability"
-  config.vm.provision "file", source: "../remove-capability", destination: "~/remove-capability"
-  config.vm.provision "file", source: "../list-capabilities", destination: "~/list-capabilities"
+  config.vm.provision "file", source: "../add-capability.py", destination: "~/add-capability.py"
+  config.vm.provision "file", source: "../remove-capability.py", destination: "~/remove-capability.py"
+  config.vm.provision "file", source: "../list-capabilities.py", destination: "~/list-capabilities.py"
   config.vm.provision "file", source: "../rules_and_port_generator.py", destination: "~/rules_and_port_generator.py"
-  
+  config.vm.provision "file", source: "../get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py"
 
-  #Give execution rights to manually-invoked scripts 
+  #Give execution rights to manually-invoked scripts
   config.vm.provision "shell", inline: "chmod +x manage_acl.sh"
   config.vm.provision "shell", inline: "chmod +x query_capabilities_directory.sh"
+  config.vm.provision "shell", inline: "chmod +x put_manual.sh"
+  config.vm.provision "shell", inline: "chmod +x get_manual.sh"
   config.vm.provision "shell", inline: "chmod +x get_random_ip.py"
   config.vm.provision "shell", inline: "chmod +x configure_dhcp.py"
- 
-  #Update VM, install OpenVPN, dos2unix, python3.9 and scripts' dependencies
+  config.vm.provision "shell", inline: "chmod +x add-capability.py"
+  config.vm.provision "shell", inline: "chmod +x remove-capability.py"
+  config.vm.provision "shell", inline: "chmod +x list-capabilities.py"
+  config.vm.provision "shell", inline: "chmod +x get_subnet_from_netbox.py"
+
+  #Update VM, install OpenVPN, dos2unix, python3.9, vsftpd and scripts' dependencies
   config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
-  config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip"
+  config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip vsftpd"
   config.vm.provision "shell", inline: "sudo add-apt-repository ppa:deadsnakes/ppa"
   config.vm.provision "shell", inline: "sudo apt-get -y install python3.9"
   config.vm.provision "shell", inline: "python3.9 -m pip install watchdog"
   config.vm.provision "shell", inline: "python3.9 -m pip install paho-mqtt"
+  config.vm.provision "shell", inline: "python3.9 -m pip install requests"
   config.vm.provision "shell", inline: "wget https://github.com/hivemq/mqtt-cli/releases/download/v4.6.2/mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "sudo apt-get -y install ./mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "rm mqtt-cli-4.6.2.deb"
- 
+
   #Fix CRLF in case host is running Windows
   config.vm.provision "shell", inline: "dos2unix iptables.sh"
   config.vm.provision "shell", inline: "dos2unix manage_acl.sh"
@@ -78,17 +78,16 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "dos2unix get_random_ip.py"
   config.vm.provision "shell", inline: "dos2unix configure_dhcp.py"
   config.vm.provision "shell", inline: "dos2unix manage_capabilities.py"
-  config.vm.provision "shell", inline: "dos2unix add-capability"
-  config.vm.provision "shell", inline: "dos2unix remove-capability"
-  config.vm.provision "shell", inline: "dos2unix list-capabilities"
+  config.vm.provision "shell", inline: "dos2unix add-capability.py"
+  config.vm.provision "shell", inline: "dos2unix remove-capability.py"
+  config.vm.provision "shell", inline: "dos2unix list-capabilities.py"
   config.vm.provision "shell", inline: "dos2unix rules_and_port_generator.py"
- 
-  #Install DHCP server, set up configuration files and start service
+  config.vm.provision "shell", inline: "dos2unix get_subnet_from_netbox.py"
+
+  #Install DHCP server, set up configuration files, configure iptables and start service
   config.vm.provision "shell", inline: "sed -i '15s/192.168.5.1/#{VM_IP}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '13s/192.168.5.0/#{SUBNET_IP}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '13s/255.255.255.0/#{NETMASK}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '14s/192.168.5.2/#{STARTING_IP}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "sed -i '14s/192.168.5.255/#{ENDING_IP}/' dhcpd.conf"
+  onfig.vm.provision "shell", inline: "echo getting IP address block from NetBox and using it to configure the DHCP server and iptables", run:'always'
+  config.vm.provision "shell", inline: "python3.9 get_subnet_from_netbox.py #{PARTY_SLUG_FROM_NETBOX}", run:'always'
   config.vm.provision "shell", inline: "sudo apt-get -y install isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo mv dhcpd.conf /etc/dhcp/dhcpd.conf"
   config.vm.provision "shell", inline: "sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd_base.conf"
@@ -96,26 +95,25 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo systemctl enable isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo systemctl start isc-dhcp-server"
 
+  #Set party nickname
+  config.vm.provision "shell", inline: "echo #{PARTY_NICKNAME} > partynickname.txt"
+
   #enable traffic forwarding
   config.vm.provision "shell", inline: "echo enabling traffic forwarding"
   config.vm.provision "shell", inline: "echo 1 > /proc/sys/net/ipv4/ip_forward", run: 'always'
-  
+
   #make sure the garbage collector for the ARP table will run with even a low number of connected devices
   config.vm.provision "shell", inline: "echo 0 > /proc/sys/net/ipv4/neigh/default/gc_thresh1", run: 'always'
-  
+
   #make sure devices are not removed from the ARP table too soon
   config.vm.provision "shell", inline: "echo 600 > /proc/sys/net/ipv4/neigh/default/base_reachable_time", run: 'always'
-  
+
   #read out the ARP table to a temporary file, since /proc/net/arp is dynamically generated when called, hence cannot be observed
-  config.vm.provision "shell", inline: "echo \"* * * * * cat /proc/net/arp > /tmp/arp_table\" | crontab -", run: 'always'  
-  
+  config.vm.provision "shell", inline: "echo \"* * * * * cat /proc/net/arp > /tmp/arp_table\" | crontab -", run: 'always'
+
   #set up crontab
   config.vm.provision "shell", inline: "/etc/init.d/cron restart", run: 'always'
-   
-  #Configure iptables
-  config.vm.provision "shell", inline: "echo configuring iptables"
-  config.vm.provision "shell", inline: "sudo bash iptables.sh #{IP_RANGE}", run: 'always'
-  
+
   #Start init.sh, OpenVPN and arp_table_observer.py
   config.vm.provision "shell", inline: "echo running init.sh script", run: 'always'
   config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'

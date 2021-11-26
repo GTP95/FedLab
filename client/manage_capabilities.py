@@ -27,30 +27,30 @@ from rules_and_port_generator import generatePortAndAddRules
 TTL = 14*24*60*60
 SERVER = "10.0.2.2"
 PORT = 1883
-OPENVPN_CLIENT_NAME = ""
+partyNickname = ""
 GATEWAY_IP = ""
 
 # Get the gateway ip from the dhcpd.conf file
 file = open("/etc/dhcp/dhcpd.conf", "r")
 for line in file:
     if " option routers" in line:
-        GATEWAY_IP = line[17:-2] 
+        GATEWAY_IP = line[17:-2]
 file.close()
 
-# Get the client name, which is the same as the ...ovpn file
-for file in os.listdir("/home/vagrant"):
-    if file.endswith(".ovpn"):
-        OPENVPN_CLIENT_NAME = file[:-5]
+# Get the party nickname
+f = open("/home/vagrant/partynickname.txt", "r")
+partyNickname = f.readline()
+f.close
 
 
 class MqttCapabilityUpdateManager:
     def publish_capability_add(self, capability_string):
         # use MQTT-CLI to publish the message
-        # os.system("mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
-        print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
-            SERVER,
-            capability_string
-        ))
+        os.system("mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
+        # print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
+        #    SERVER,
+        #    capability_string
+        #))
 
 
 mqtt_client = MqttCapabilityUpdateManager()
@@ -95,7 +95,7 @@ def construct_local_capability_object(ip, gateway_port, device_port, name, desc)
 
 def construct_remote_capability_object(name, desc, port):
     return {
-           "party_name": OPENVPN_CLIENT_NAME,
+           "party_name": partyNickname,
            "gateway_ip": GATEWAY_IP,
            "gateway_port": port,
            "capability_name": name,
@@ -104,24 +104,24 @@ def construct_remote_capability_object(name, desc, port):
          }
 
 
-def construct_local_device_object(device_ip, name):
+def construct_local_device_object(device_ip, name, desc):
     return {
            "device": device_ip,
            "gateway_port": None,
            "device_port": None,
            "capability_name": name,
-           "description": None,
+           "description": desc,
            "is_capability": False
          }
 
 
-def construct_remote_device_object(device_ip, name):
+def construct_remote_device_object(device_ip, name, desc):
     return {
-           "party_name": OPENVPN_CLIENT_NAME,
+           "party_name": partyNickname,
            "gateway_ip": device_ip,
            "gateway_port": None,
            "capability_name": name,
-           "description": None,
+           "description": desc,
            "is_capability": False
          }
 
@@ -161,15 +161,15 @@ def remove_capability(uuid):
     pass
 
 
-def add_device(ip, name):
+def add_device(ip, name, desc):
     cap_directory = read_directory()
 
     new_device = construct_local_device_object(
-        ip, name)
+        ip, name, desc)
     cap_directory["capabilities"].append(new_device)
 
     remote_device = construct_remote_device_object(
-        ip, name)
+        ip, name, desc)
     mqtt_client.publish_capability_add(
         json.dumps(remote_device, indent=2))
 
