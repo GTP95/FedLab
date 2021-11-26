@@ -35,7 +35,7 @@ def generatePort():
 
 
 def addIptablesRules(ipAddress, devicePort, externalPort):
-	address=netifaces.ifaddresses('enp0s8')[netifaces.AF_INET][0]['addr']	#get gateway's internal address	
+	address=ifaddresses('enp0s8')[AF_INET][0]['addr']	#get gateway's internal address	
 	os.system("sudo iptables -t nat -A PREROUTING -p tcp --dport " + str(externalPort)
 	          + " -j DNAT --to-destination " + str(ipAddress) + ":" + str(devicePort))
 	os.system("sudo iptables -t nat -A POSTROUTING -p tcp --dport "
