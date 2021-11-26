@@ -13,6 +13,9 @@ VM_IP="192.168.42.1"
 #In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use to connect the Gateway to WAN (probably your pre-existing LAN)
 LAB_SUBNET_ADAPTER="enp2s0"
 
+#In the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
+IP_RANGE="192.168.0.0/24"
+
 #In next line, substitute "YOUR_CERTIFICATE.ovpn" with the name of your OpenVPN certificate
 CERT="certificate.ovpn"
 
@@ -87,7 +90,8 @@ Vagrant.configure("2") do |config|
 
   #Install DHCP server, set up configuration files, configure iptables and start service
   config.vm.provision "shell", inline: "sed -i '15s/192.168.5.1/#{VM_IP}/' dhcpd.conf"
-  config.vm.provision "shell", inline: "echo getting IP address block from NetBox and using it to configure the DHCP server and iptables", run:'always'
+  config.vm.provision "shell", inline: "sudo bash iptables.sh #{IP_RANGE}", run: 'always'
+  config.vm.provision "shell", inline: "echo getting IP address block from NetBox and using it to configure the DHCP server", run:'always'
   config.vm.provision "shell", inline: "python3.9 get_subnet_from_netbox.py #{PARTY_SLUG_FROM_NETBOX}", run:'always'
   config.vm.provision "shell", inline: "sudo apt-get -y install isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo mv dhcpd.conf /etc/dhcp/dhcpd.conf"
