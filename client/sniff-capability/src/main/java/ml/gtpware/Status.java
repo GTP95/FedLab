@@ -32,6 +32,7 @@ public class Status {
         String command=cmdToSniff+fileName;
 
         this.tcpdump=Runtime.getRuntime().exec(command); //starts the packet capture
+        isPacketCaptureInProgress=true;
 
         return new PacketCaptureDetails(true, token, fileName);
     }
@@ -40,6 +41,7 @@ public class Status {
         if(!isPacketCaptureInProgress) return false;
         if(token.equals(this.token)){
             this.tcpdump.destroy(); //WARNING: Whether the process is normally terminated or not is implementation dependent!!! Luckily we're running this inside a VM, so the behavior will be the same for all parties, but be careful in reusing this code elsewhere!!!!
+            isPacketCaptureInProgress=false;
             return true;
         }
         return false;
