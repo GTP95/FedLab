@@ -163,7 +163,7 @@ class MqttAclManager:
         # TODO: some validation
 
         with open("device_directory", 'a') as file:
-            file.writelines(msg + '\n')
+            file.writelines(msg.payload.decode("utf-8") + '\n')
 
     def handle_device_status_update(self, msg):
         init_file_if_not_exists()
@@ -203,6 +203,7 @@ class MqttAclManager:
         # renewed when reconnected after a disconnect
         client.subscribe("aclUpdate")
         client.subscribe("device_status_update")
+        client.subscribe("capability_add")
 
     # called when a relevant PUB message is received from the broker
     def on_message(self, client, userdata, msg):
