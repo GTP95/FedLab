@@ -10,12 +10,13 @@ public class Status {
    private boolean isPacketCaptureInProgress;
    private static Status instance;
    private String token;
-   private final String cmdToSniff;
+   private final String cmdToSniff, basedir;
    private Process tcpdump;
 
    private Status(){
        this.isPacketCaptureInProgress=false;
        this.cmdToSniff="sudo tcpdump -i "+Main.getIface()+" -w ";   //append fileName here
+       this.basedir="/home/vagrant/writablecaptures/";
    }
 
    public static Status getInstance(){
@@ -29,7 +30,7 @@ public class Status {
         this.token=token;
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new java.util.Date());
         String fileName=timeStamp+".pcap";
-        String command=cmdToSniff+fileName;
+        String command=cmdToSniff+basedir+fileName;
 
         this.tcpdump=Runtime.getRuntime().exec(command); //starts the packet capture
         isPacketCaptureInProgress=true;
