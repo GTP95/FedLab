@@ -26,5 +26,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     manage_capabilities.add_capability(
-        args.ip, args.port, args.name, args.description)
+        args.ip, args.port, args.name, args.desc)
     manage_capabilities.pretty_print_directory()  # todo: remove

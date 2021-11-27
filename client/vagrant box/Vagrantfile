@@ -1,17 +1,20 @@
 ### CONFIGURATION PARAMETERS ###
 
 #Pick a nickname that will be showed as your party name on the FedLab directory.
-PARTY_NICKNAME=""
+PARTY_NICKNAME="Test"
 
 #Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
-PARTY_SLUG_FROM_NETBOX=""
+PARTY_SLUG_FROM_NETBOX="giacomo"
 #In the next line, change 192.168.5.1 to the IP you want the gateway to use.
 #WARNING: make sure the IP you choose does not interfere with any existing networks,
 #i.e. please use a subnet that is not in use.
-VM_IP="192.168.5.1"
+VM_IP="192.168.42.1"
 
 #In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use to connect the Gateway to WAN (probably your pre-existing LAN)
-LAB_SUBNET_ADAPTER="enp0s20u6"
+LAB_SUBNET_ADAPTER="wlp3s0"
+
+#In the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
+IP_RANGE="192.168.0.0/24"
 
 #In next line, substitute "YOUR_CERTIFICATE.ovpn" with the name of your OpenVPN certificate
 CERT="certificate.ovpn"
@@ -39,7 +42,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "../remove-capability.py", destination: "~/remove-capability.py"
   config.vm.provision "file", source: "../list-capabilities.py", destination: "~/list-capabilities.py"
   config.vm.provision "file", source: "../rules_and_port_generator.py", destination: "~/rules_and_port_generator.py"
-  config.vm.provision "file", source: "../get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py"
+  config.vm.provision "file", source: "../get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py" 
+  config.vm.provision "file", source: "../sniff-capability/target/sniff-capability-1.0-SNAPSHOT-jar-with-dependencies.jar", destination: "~/sniff-capability.jar"
 
   #Give execution rights to manually-invoked scripts
   config.vm.provision "shell", inline: "chmod +x manage_acl.sh"
@@ -86,8 +90,9 @@ Vagrant.configure("2") do |config|
 
   #Install DHCP server, set up configuration files, configure iptables and start service
   config.vm.provision "shell", inline: "sed -i '15s/192.168.5.1/#{VM_IP}/' dhcpd.conf"
-  onfig.vm.provision "shell", inline: "echo getting IP address block from NetBox and using it to configure the DHCP server and iptables", run:'always'
-  config.vm.provision "shell", inline: "python3.9 get_subnet_from_netbox.py #{PARTY_SLUG_FROM_NETBOX}", run:'always'
+  config.vm.provision "shell", inline: "sudo bash iptables.sh #{IP_RANGE}", run: 'always'
+  config.vm.provision "shell", inline: "echo getting IP address block from NetBox and using it to configure the DHCP server", run:'always'
+  config.vm.provision "shell", inline: "python3.9 get_subnet_from_netbox.py #{PARTY_SLUG_FROM_NETBOX}"
   config.vm.provision "shell", inline: "sudo apt-get -y install isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo mv dhcpd.conf /etc/dhcp/dhcpd.conf"
   config.vm.provision "shell", inline: "sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd_base.conf"
@@ -113,8 +118,8 @@ Vagrant.configure("2") do |config|
 
   #set up crontab
   config.vm.provision "shell", inline: "/etc/init.d/cron restart", run: 'always'
-
-  #Start init.sh, OpenVPN and arp_table_observer.py
+   
+  #Start init.sh, OpenVPN, arp_table_observer.py and sniff-capability
   config.vm.provision "shell", inline: "echo running init.sh script", run: 'always'
   config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'
   config.vm.provision "shell", inline: "echo starting OpenVPN", run: 'always'
@@ -123,4 +128,5 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "python3.9 acl_persistence.py", run: 'always'
   config.vm.provision "shell", inline: "echo starting arp_table_observer.py", run: 'always'
   config.vm.provision "shell", inline: "python3.9 arp_table_observer.py &", run: 'always'
+  config.vm.provision "shell", inline: "java -jar sniff-capability.jar #{LAB_SUBNET_ADAPTER} 1024 &"
 end

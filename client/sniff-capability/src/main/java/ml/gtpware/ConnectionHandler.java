@@ -31,6 +31,7 @@ public class ConnectionHandler implements Runnable{
                             "To avoid mixing you experiment's results with someone else's experiment, " +
                             "it is not possible to start another one at the moment. Please try again later");
                 }
+                    clientSocket.close();
             }
             if(command.startsWith("stop")){
                 String[] elements=command.split(" ", 2);
@@ -40,8 +41,12 @@ public class ConnectionHandler implements Runnable{
                 else{
                     out.println("Couldn't stop packet capture: either wrong token or no capture is in progress");
                 }
+                clientSocket.close();
             }
-            else out.println("Sorry, couldn't understand your command");
+            else{
+                out.println("Sorry, couldn't understand your command");
+                clientSocket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

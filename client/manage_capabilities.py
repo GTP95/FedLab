@@ -25,7 +25,7 @@ from rules_and_port_generator import generatePortAndAddRules
 
 # 2 weeks
 TTL = 14*24*60*60
-SERVER = "10.0.2.2"
+SERVER = "192.168.201.2"
 PORT = 1883
 partyNickname = ""
 GATEWAY_IP = ""
@@ -46,11 +46,11 @@ f.close
 class MqttCapabilityUpdateManager:
     def publish_capability_add(self, capability_string):
         # use MQTT-CLI to publish the message
-        # os.system("mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
-        print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
-            SERVER,
-            capability_string
-        ))
+        os.system("mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
+        # print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
+        #    SERVER,
+        #    capability_string
+        #))
 
 
 mqtt_client = MqttCapabilityUpdateManager()

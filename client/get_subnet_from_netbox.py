@@ -33,6 +33,3 @@ os.system("sed -i '13s/192.168.5.0/"+subnetIP+"/'"+" dhcpd.conf")
 os.system("sed -i '13s/255.255.255.0/"+netmask+"/'"+" dhcpd.conf")
 os.system("sed -i '14s/192.168.5.2/"+firstIP+"/'"+" dhcpd.conf")
 os.system("sed -i '14s/192.168.5.255/"+lastIP+"/'"+" dhcpd.conf")
-
-#Configure iptables
-os.system("sudo bash iptables.sh "+IP_RANGE)
