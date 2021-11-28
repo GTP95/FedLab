@@ -179,11 +179,11 @@ def remove_device():
 
 
 def add_capability_rules(device_ip, device_port):
-    os.system("sudo iptables -A FORWARD -d {} -p tcp --dport {} -j ACCEPT".
+    os.system("sudo iptables -A FORWARD -i tun0 -d {} -p tcp --dport {} -j ACCEPT".
               format(device_ip, device_port))
-    os.system("sudo iptables -A FORWARD -d {} -p udp --dport {} -j ACCEPT".
+    os.system("sudo iptables -A FORWARD -i tun0 -d {} -p udp --dport {} -j ACCEPT".
               format(device_ip, device_port))
 
 
 def add_device_rule(device_ip):
-    os.system("sudo iptables -A FORWARD -d {} -j ACCEPT".format(device_ip))
+    os.system("sudo iptables -A FORWARD -i tun0 -d {} -j ACCEPT".format(device_ip))
