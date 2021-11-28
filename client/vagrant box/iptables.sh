@@ -1,4 +1,9 @@
 #!/bin/bash
+INTERNET_ADAPTER=enp0s3
+VM_SUBNET_ADAPTER=enp0s8
+VPN_ADAPTER=tun0
+
+
 iptables --flush
 iptables --delete-chain
 iptables --table nat --delete-chain
@@ -6,52 +11,41 @@ iptables --table nat -F
 iptables --table nat -X
 
 iptables -P INPUT DROP
-iptables -P OUTPUT DROP
+iptables -P OUTPUT ACCEPT  # for now, accept requests originating from the VM. TODO: refine
+iptables -P FORWARD DROP
 
-# allow connections from localhost
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A OUTPUT -o lo -j ACCEPT
 
-# EDIT THE FOLLOWING TWO LINES. Make sure that the gateway can communicate within your own network
-iptables -A INPUT -s $1 -j ACCEPT
-iptables -A OUTPUT -d $1 -j ACCEPT
-
-# for now, accept requests from the gateway. TODO: refine or remove
-iptables -A OUTPUT -j ACCEPT
-
+# ----INPUT----
 # allow established sessions to receive traffic
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
-# allow TUN such that the VPN connection works
-iptables -A INPUT -i tun0 -j ACCEPT
-iptables -A FORWARD -i tun0 -j ACCEPT
-iptables -A FORWARD -o tun0 -j ACCEPT
-#iptables -t nat -A POSTROUTING -o tun+ -j MASQUERADE
-iptables -A OUTPUT -o tun0 -j ACCEPT
+# allow incoming connections from localhost
+iptables -A INPUT -i lo -j ACCEPT
 
-# allow VPN connection
-iptables -I OUTPUT -p udp --destination-port 1194 -m comment --comment "Allow VPN connection" -j ACCEPT
-iptables -I OUTPUT -p udp --destination-port 53 -m comment --comment "Allow DNS" -j ACCEPT
+# allow incoming ICMP echo requests from the VPN and VM subnet
+iptables -A INPUT -i $VPN_ADAPTER -p icmp --icmp-type 8 -j ACCEPT
+iptables -A INPUT -i $VM_SUBNET_ADAPTER -p icmp --icmp-type 8 -j ACCEPT
 
-# EDIT THE FOLLOWING LINE. Allow SSH from/to local network. Needed by Vagrant to provision VM
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-iptables -A OUTPUT -p tcp --sport 22 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+# allow SSH from the host PC. Needed by Vagrant to provision VM
+iptables -A INPUT -i $INTERNET_ADAPTER -p tcp --dport 22 -j ACCEPT
+# ----/INPUT----
 
-# allow communication with devices in the lab LAN
-iptables -A OUTPUT -o enp0s8 -j ACCEPT
-iptables -A INPUT -i enp0s8 -j ACCEPT
 
-# convert local lab IP of IoT device to IP of the gateway
-iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
-
+# ----FORWARD----
 # allow established incoming connections to IoT devices
-iptables -A FORWARD -i enp0s3 -o enp0s8 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -o $VM_SUBNET_ADAPTER -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
-# EDIT THE FOLLOWING LINE. drop traffic from IoT devices to your own LAN range
-iptables -A FORWARD -i enp0s8 -o enp0s3 -d $1 -j DROP
+# drop traffic from IoT devices to the IP range of your organisation
+iptables -A FORWARD -i $VM_SUBNET_ADAPTER -o $INTERNET_ADAPTER -d $1 -j DROP
 
-# accept remaining traffic from IoT devices (i.e. everything except your own LAN range)
-iptables -A FORWARD -i enp0s8 -o enp0s3 -j ACCEPT
+# allow traffic from IoT devices otherwise
+iptables -A FORWARD -i $VM_SUBNET_ADAPTER -j ACCEPT
+# ----/FORWARD----
+
+
+# enable NAT for destinations outside of the lab
+iptables -t nat -A POSTROUTING -o $INTERNET_ADAPTER -j MASQUERADE
+
 
 echo "saving"
 iptables-save > /etc/iptables.rules
