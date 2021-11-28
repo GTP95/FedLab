@@ -64,8 +64,8 @@ public class CapabilityDirectoryContainer {
                 for(Capability capability : (ArrayList<Capability>)arrayList){
                     string+=("\t"+"Capability name: "+capability.capability_name+"\n" +
                             "\t"+"Capability description: "+capability.description+"\n"+
-                            "\t"+"Gateway IP: "+capability.gateway_ip+"\n" +
-                            "\t"+"Gateway port: "+capability.gateway_port+"\n\n");
+                            "\t"+"Capability IP: "+capability.gateway_ip+"\n" +
+                            "\t"+"Capability port: "+capability.gateway_port+"\n\n");
                 }
             }
         return string;
