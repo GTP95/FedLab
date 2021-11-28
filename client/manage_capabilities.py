@@ -20,11 +20,7 @@
 
 import json
 import os
-from rules_and_port_generator import generatePortAndAddRules
 
-
-# 2 weeks
-TTL = 14*24*60*60
 SERVER = "192.168.201.2"
 PORT = 1883
 partyNickname = ""
@@ -46,7 +42,8 @@ f.close
 class MqttCapabilityUpdateManager:
     def publish_capability_add(self, capability_string):
         # use MQTT-CLI to publish the message
-        os.system("mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
+        os.system(
+            "mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
         # print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
         #    SERVER,
         #    capability_string
@@ -136,6 +133,8 @@ def add_capability(ip, device_port, name, desc):
     mqtt_client.publish_capability_add(
         json.dumps(remote_capability, indent=2))
 
+    add_capability_rules(ip, device_port)
+
     write_directory(cap_directory)
 
 
@@ -169,9 +168,22 @@ def add_device(ip, name, desc):
     mqtt_client.publish_capability_add(
         json.dumps(remote_device, indent=2))
 
+    add_device_rule(ip)
+
     write_directory(cap_directory)
 
 
 def remove_device():
     # TODO
     pass
+
+
+def add_capability_rules(device_ip, device_port):
+    os.system("sudo iptables -A FORWARD -d {} -p tcp --dport {} -j ACCEPT".
+              format(device_ip, device_port))
+    os.system("sudo iptables -A FORWARD -d {} -p udp --dport {} -j ACCEPT".
+              format(device_ip, device_port))
+
+
+def add_device_rule(device_ip):
+    os.system("sudo iptables -A FORWARD -d {} -j ACCEPT".format(device_ip))
