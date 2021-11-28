@@ -52,7 +52,7 @@ public class FileReader {
 
         String title=FigletFont.convertOneLine("FedLab directory");
         prettyFormattedDeviceDirectoryContent=title+"\n\n\n"+capabilityDirectoryContainer.prettyFormattedCapabilities()+capabilityDirectoryContainer.prettyFormattedDevices();
-        HTMLGenerator.generateHTMLDirectory(title, capabilityDirectoryContainer.prettyFormattedCapabilities(), capabilityDirectoryContainer.prettyFormattedDevices(), "/var/www/html");
+        HTMLGenerator.generateHTMLDirectory(title, capabilityDirectoryContainer.prettyFormattedCapabilities(), capabilityDirectoryContainer.prettyFormattedDevices(), "/var/www/html/index.html");
     }
 
     synchronized String readFile(){
