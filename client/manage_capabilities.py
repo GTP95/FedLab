@@ -82,61 +82,58 @@ def construct_empty_directory():
         f.write(json.dumps({"capabilities": []}))
 
 
-def construct_local_capability_object(ip, gateway_port, device_port, name, desc):
+def construct_local_capability_object(ip, device_port, name, desc):
     return {
-           "device": ip,
-           "gateway_port": gateway_port,
-           "device_port": device_port,
-           "capability_name": name,
-           "description": desc,
-           "is_capability": True
-         }
+        "device": ip,
+        "device_port": device_port,
+        "capability_name": name,
+        "description": desc,
+        "is_capability": True
+    }
 
 
-def construct_remote_capability_object(name, desc, port):
+def construct_remote_capability_object(device_ip, port, name, desc):
     return {
-           "party_name": partyNickname,
-           "gateway_ip": GATEWAY_IP,
-           "gateway_port": port,
-           "capability_name": name,
-           "description": desc,
-           "is_capability": True
-         }
+        "party_name": partyNickname,
+        "gateway_ip": device_ip,
+        "gateway_port": port,
+        "capability_name": name,
+        "description": desc,
+        "is_capability": True
+    }
 
 
 def construct_local_device_object(device_ip, name, desc):
     return {
-           "device": device_ip,
-           "gateway_port": None,
-           "device_port": None,
-           "capability_name": name,
-           "description": desc,
-           "is_capability": False
-         }
+        "device": device_ip,
+        "gateway_port": None,
+        "device_port": None,
+        "capability_name": name,
+        "description": desc,
+        "is_capability": False
+    }
 
 
 def construct_remote_device_object(device_ip, name, desc):
     return {
-           "party_name": partyNickname,
-           "gateway_ip": device_ip,
-           "gateway_port": None,
-           "capability_name": name,
-           "description": desc,
-           "is_capability": False
-         }
+        "party_name": partyNickname,
+        "gateway_ip": device_ip,
+        "gateway_port": None,
+        "capability_name": name,
+        "description": desc,
+        "is_capability": False
+    }
 
 
 def add_capability(ip, device_port, name, desc):
     cap_directory = read_directory()
 
-    gateway_port = generatePortAndAddRules(ip, device_port)
-
     new_capability = construct_local_capability_object(
-        ip, str(gateway_port), device_port, name, desc)
+        ip, device_port, name, desc)
     cap_directory["capabilities"].append(new_capability)
 
     remote_capability = construct_remote_capability_object(
-        name, desc, str(gateway_port))
+        ip, device_port, name, desc)
     mqtt_client.publish_capability_add(
         json.dumps(remote_capability, indent=2))
 
