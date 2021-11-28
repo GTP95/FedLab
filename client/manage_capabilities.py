@@ -106,7 +106,6 @@ def construct_remote_capability_object(device_ip, port, name, desc):
 def construct_local_device_object(device_ip, name, desc):
     return {
         "device": device_ip,
-        "gateway_port": None,
         "device_port": None,
         "capability_name": name,
         "description": desc,
