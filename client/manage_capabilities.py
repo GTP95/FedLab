@@ -36,7 +36,7 @@ file.close()
 # Get the party nickname
 f = open("/home/vagrant/partynickname.txt", "r")
 partyNickname = f.readline()
-f.close
+f.close()
 
 
 class MqttCapabilityUpdateManager:
@@ -156,7 +156,7 @@ def remove_capability(uuid):
     pass
 
 
-def add_device(ip, name, desc):
+def expose_device(ip, name, desc):
     cap_directory = read_directory()
 
     new_device = construct_local_device_object(
@@ -171,6 +171,22 @@ def add_device(ip, name, desc):
     add_device_rule(ip)
 
     write_directory(cap_directory)
+
+
+def add_device(mac, name, desc, expose):
+    mac = (mac.replace("-", ":")).lower()
+    os.system("sudo ./manage_acl.sh add {}".format(mac))
+
+    if expose:
+        ip=""
+        file = open("./MAC_addresses", "r")
+        for line in file:
+            if mac in line:
+                ip="".join(line.split(" ", 1)[:-1])
+        file.close()
+        if ip == "":
+            os.system("echo 'Device was not added to the acl'")
+        expose_device(ip, name, desc)
 
 
 def remove_device():

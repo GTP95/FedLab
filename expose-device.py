@@ -11,8 +11,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Utility to manage the devices exposed by the bundle box.")
 
-    parser.add_argument("-m", "--mac", metavar="mac_addr", type=str, required=True,
-                        help="The MAC address of the device you want to connect/expose.")
+    parser.add_argument("-i", "--ip", metavar="ip_addr", type=str, required=True,
+                        help="The IP address of the device you want to expose.")
 
     parser.add_argument("-n", "--name", metavar="device_name", type=str, required=True,
                         help="The name of the device you want to expose as it will show up in the device directory.")
@@ -20,10 +20,9 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--desc", metavar="device_desc", type=str, required=True,
                         help="The description of the device you want to expose as it will show up in the device directory. Also include the name of the device's manual, if any, such that others are easily able to retrieve it.")
 
-    parser.add_argument('-e', "--expose", dest="expose_device", action='store_true',
-                        help="Use -e to expose the device to the entire network. Without -e only add the device to the ACL.")
     args = parser.parse_args()
 
-    manage_capabilities.add_device(
-        args.mac, args.name, args.desc, args.expose_device)
+    manage_capabilities.expose_device(
+        args.ip, args.name, args.desc)
     manage_capabilities.pretty_print_directory()  # todo: remove
+
