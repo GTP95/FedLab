@@ -20,9 +20,9 @@
 
 import json
 import os
+import requests
 
-SERVER = "192.168.201.2"
-PORT = 1883
+SERVER = "localhost:8080"
 partyNickname = ""
 GATEWAY_IP = ""
 
@@ -39,18 +39,32 @@ partyNickname = f.readline()
 f.close()
 
 
-class MqttCapabilityUpdateManager:
-    def publish_capability_add(self, capability_string):
-        # use MQTT-CLI to publish the message
-        os.system(
-            "mqtt pub -h {} -t capability_add -m '{}'".format(SERVER, capability_string))
-        # print("\nmqtt pub -h {} -t capability_add -m '{}'\n".format(
-        #    SERVER,
-        #    capability_string
-        #))
+def get_capabilities():
+    resp = requests.get("{}/capabilities".format(SERVER))
+
+    # return body
+    print(resp.content)
+    return resp.content
 
 
-mqtt_client = MqttCapabilityUpdateManager()
+def post_capability(capability_object):
+    resp = requests.post("{}/capabilities".format(SERVER), data = capability_object)
+
+    print(resp.content)
+
+
+def get_devices():
+    resp = requests.get("{}/devices".format(SERVER))
+
+    # return body
+    print(resp.content)
+    return resp.content
+
+
+def post_device(device_object):
+    resp = requests.post("{}/devices".format(SERVER), data = device_object)
+
+    print(resp.content)
 
 
 def read_directory():
@@ -128,10 +142,9 @@ def add_capability(ip, device_port, name, desc):
         ip, device_port, name, desc)
     cap_directory["capabilities"].append(new_capability)
 
-    remote_capability = construct_remote_capability_object(
+    remote_capability_object = construct_remote_capability_object(
         ip, device_port, name, desc)
-    mqtt_client.publish_capability_add(
-        json.dumps(remote_capability, indent=2))
+    post_capability(remote_capability_object)
 
     add_capability_rules(ip, device_port)
 
@@ -163,10 +176,9 @@ def expose_device(ip, name, desc):
         ip, name, desc)
     cap_directory["capabilities"].append(new_device)
 
-    remote_device = construct_remote_device_object(
+    remote_device_object = construct_remote_device_object(
         ip, name, desc)
-    mqtt_client.publish_capability_add(
-        json.dumps(remote_device, indent=2))
+    post_device(remote_device_object)
 
     add_device_rule(ip)
 
