@@ -1,6 +1,10 @@
 package ml.gtpware.fedlabdirectory;
 
+import com.github.lalyos.jfiglet.FigletFont;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 @RestController
 public class FedLabController {
@@ -11,13 +15,22 @@ public class FedLabController {
     }
 
     @GetMapping("/capabilities")
-    String getCapabilities(){
-        return directoryContainer.prettyFormattedCapabilities();
+    ArrayList getCapabilities(){
+        return directoryContainer.getCapabilities();
     }
 
     @GetMapping("/devices")
-    String getDevices(){
-        return directoryContainer.prettyFormattedDevices();
+    ArrayList getDevices(){
+        return directoryContainer.getDevices();
+    }
+
+    @GetMapping("/directory")
+    String prettyFormattedDirectory(){
+        try {
+            return FigletFont.convertOneLine("FedLab directory") + directoryContainer.prettyFormattedCapabilities() + directoryContainer.prettyFormattedDevices();
+        } catch (IOException e) {
+            return "FedLab directory" + directoryContainer.prettyFormattedCapabilities() + directoryContainer.prettyFormattedDevices();
+        }
     }
 
     @RequestMapping(value="/capabilities", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")

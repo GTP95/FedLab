@@ -93,4 +93,11 @@ public class DirectoryContainer {
         return string;
     }
 
+    public ArrayList getCapabilities() {
+        return capabilities;
+    }
+
+    public ArrayList getDevices() {
+        return devices;
+    }
 }
