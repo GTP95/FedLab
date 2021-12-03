@@ -15,12 +15,12 @@ public class FedLabController {
     }
 
     @GetMapping("/capabilities")
-    ArrayList getCapabilities(){
+    ArrayList<ArrayList<Capability>> getCapabilities(){
         return directoryContainer.getCapabilities();
     }
 
     @GetMapping("/devices")
-    ArrayList getDevices(){
+    ArrayList<ArrayList<Capability>> getDevices(){
         return directoryContainer.getDevices();
     }
 

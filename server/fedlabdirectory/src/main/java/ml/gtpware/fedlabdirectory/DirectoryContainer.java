@@ -3,8 +3,8 @@ package ml.gtpware.fedlabdirectory;
 import java.util.ArrayList;
 
 public class DirectoryContainer {
-    private ArrayList capabilities, devices;
-    private ArrayList<String> capabilitiesParties, devicesParties;
+    private final ArrayList<ArrayList<Capability>> capabilities, devices;
+    private final ArrayList<String> capabilitiesParties, devicesParties;
     private static DirectoryContainer instance;
 
     private DirectoryContainer(){
@@ -22,7 +22,7 @@ public class DirectoryContainer {
     public void addCapability(Capability capability){
         if(capabilities.isEmpty()){
             capabilities.add(new ArrayList<Capability>());
-            ((ArrayList<Capability>)capabilities.get(0)).add(capability);
+            capabilities.get(0).add(capability);
             capabilitiesParties.add(capability.party_name);
             return;
         }
@@ -36,7 +36,7 @@ public class DirectoryContainer {
         }
         else{
             capabilities.add(new ArrayList<Capability>());
-            ((ArrayList<Capability>)capabilities.get(capabilities.size()-1)).add(capability);
+            capabilities.get(capabilities.size()-1).add(capability);
             capabilitiesParties.add(capability.party_name);
         }
     }
@@ -44,7 +44,7 @@ public class DirectoryContainer {
     public void addDevice(Capability device){
         if(devices.isEmpty()){
             devices.add(new ArrayList<Capability>());
-            ((ArrayList<Capability>)devices.get(0)).add(device);
+            devices.get(0).add(device);
             devicesParties.add(device.party_name);
             return;
         }
@@ -93,11 +93,11 @@ public class DirectoryContainer {
         return string;
     }
 
-    public ArrayList getCapabilities() {
+    public ArrayList<ArrayList<Capability>> getCapabilities() {
         return capabilities;
     }
 
-    public ArrayList getDevices() {
+    public ArrayList<ArrayList<Capability>> getDevices() {
         return devices;
     }
 
