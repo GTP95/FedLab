@@ -69,7 +69,7 @@ public class DirectoryContainer {
             for(Capability capability : (ArrayList<Capability>)arrayList){
                 string+=("\t"+"Capability name: "+capability.capability_name+"\n" +
                         "\t"+"Capability description: "+capability.description+"\n"+
-                        "\t"+"Capability IP: "+capability.gateway_ip+"\n" +
+                        "\t"+"Capability IP: "+capability.ip +"\n" +
                         "\t"+"Capability port: "+capability.gateway_port+"\n\n");
             }
         }
@@ -84,10 +84,10 @@ public class DirectoryContainer {
             for(Capability capability : (ArrayList<Capability>)arrayList){
                 if(capability.description==null)
                     string+=("\t"+"Device name: "+capability.capability_name+"\n" +
-                            "\t"+"Device IP: "+capability.gateway_ip+"\n\n");
+                            "\t"+"Device IP: "+capability.ip +"\n\n");
                 else
                     string+=("\t"+"Device name: "+capability.capability_name+"\n" +
-                            "\t"+"Device IP: "+capability.gateway_ip+"\n"+"Description: "+capability.description+"\n\n");
+                            "\t"+"Device IP: "+capability.ip +"\n"+"Description: "+capability.description+"\n\n");
             }
         }
         return string;
@@ -100,4 +100,54 @@ public class DirectoryContainer {
     public ArrayList getDevices() {
         return devices;
     }
+
+    public void statusUpdate(StatusUpdate statusUpdate){    //updates the online status of a capability or device
+        for(Object arrayList : capabilities){
+            for (Capability capability : (ArrayList<Capability>)arrayList){
+                if(capability.ip.equals(statusUpdate.ip)){
+                    capability.isOnline=statusUpdate.isOnline;
+                    return;
+                }
+            }
+        }
+
+        for(Object arrayList : devices){
+            for (Capability device : (ArrayList<Capability>)arrayList){
+                if(device.ip.equals(statusUpdate.ip)){
+                    device.isOnline=statusUpdate.isOnline;
+                    return;
+                }
+            }
+        }
+    }
+
+    public void removeDevice(RemoveRequest request){
+        for(Object arraylist : devices){    //First, find and remove the device
+            for(Capability device : (ArrayList<Capability>)arraylist){
+                if(device.ip.equals(request.identifier)){
+                    ((ArrayList<Capability>) arraylist).remove(device);
+                    return; //Assuming no duplicates TODO: prevent duplicates
+                }
+            }
+        }
+
+        for (Object arraylist : capabilities){  //Then remove all associated capabilities
+            for(Capability capability : (ArrayList<Capability>)arraylist){
+                if(capability.ip.equals(request.identifier)){
+                    ((ArrayList<Capability>) arraylist).remove(capability);
+                }
+            }
+        }
+    }
+
+    public void removeCapability(RemoveRequest request){
+        for(Object arraylist : devices){
+            for(Capability capability : (ArrayList<Capability>)arraylist){
+                if(capability.uuid.equals(request.identifier)){
+                    ((ArrayList<Capability>) arraylist).remove(capability); //Again assuming no duplicates TODO: prevent duplicates
+                }
+            }
+        }
+    }
+
 }

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 @RestController
 public class FedLabController {
-    private DirectoryContainer directoryContainer;
+    private final DirectoryContainer directoryContainer;
 
     public FedLabController() {
         this.directoryContainer = DirectoryContainer.getInstance();
@@ -42,4 +42,21 @@ public class FedLabController {
     public @ResponseBody void receiveDevice(@RequestBody Capability device){
         directoryContainer.addDevice(device);
     }
+
+    @RequestMapping(value="/statusUpdate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    public @ResponseBody void statusUpdate(@RequestBody StatusUpdate statusUpdate){
+        directoryContainer.statusUpdate(statusUpdate);
+    }
+
+    @RequestMapping(value="/removeDeviceRequest", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    public @ResponseBody void removeDevice(@RequestBody RemoveRequest request){
+        directoryContainer.removeDevice(request);
+    }
+
+    @RequestMapping(value="/removeCapabilityRequest", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    public @ResponseBody void removeCapability(@RequestBody RemoveRequest request){
+        directoryContainer.removeCapability(request);
+    }
+
+
 }
