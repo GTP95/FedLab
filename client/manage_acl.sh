@@ -35,7 +35,7 @@ MAC="$2"
 NEW_MAC="${MAC//-/:}"
 
 if [[ $NEW_MAC =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]
-    then echo "Correct"
+    then echo "MAC address is valid"
 else
     echo "MAC address is invalid"
     exit
@@ -43,7 +43,7 @@ fi
 
 # Determine if the first argument has been set correctly
 if [ "$1" = 'add' ]
-    then echo "Added"
+    then echo "MAC adress was added to the ACL"
     IP_ADDR=`./get_random_ip.py $IP_RANGE`
     # Add mac addresses to the file
     echo "$IP_ADDR $NEW_MAC $CURRENT_TIME offline" >> $file_name

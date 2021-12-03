@@ -21,6 +21,7 @@
 import json
 import os
 import requests
+import re
 
 SERVER = "localhost:8080"
 partyNickname = ""
@@ -169,6 +170,19 @@ def remove_capability(uuid):
     pass
 
 
+def check_args(mac, name, desc, expose):
+    if expose:
+        if name is None or desc is None:
+            print("-n and -d are required with the -e flag")
+            return
+    
+    mac = (mac.replace("-", ":")).lower()
+    if re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", mac):
+        add_device(mac, name, desc, expose)
+    else:
+        print("MAC address is invalid")
+
+
 def expose_device(ip, name, desc):
     cap_directory = read_directory()
 
@@ -186,7 +200,6 @@ def expose_device(ip, name, desc):
 
 
 def add_device(mac, name, desc, expose):
-    mac = (mac.replace("-", ":")).lower()
     os.system("sudo ./manage_acl.sh add {}".format(mac))
 
     if expose:
