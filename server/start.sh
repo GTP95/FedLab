@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar /server-subscriber/device_directory.jar
+java -jar /server-subscriber/fedlab_directory.jar
