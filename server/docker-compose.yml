@@ -15,20 +15,6 @@ services:
     volumes:
       - ./openvpn-data/conf:/etc/openvpn
 
-  mqtt:
-    image: micwy/vernemq:1.11.0-alpine
-    container_name: VerneMQ
-    ports:
-      - "1883:1883/tcp"
-      - "8080:8080/tcp"
-    networks:
-      intersect_docker_network:
-        ipv4_address: 192.168.201.2
-    restart: unless-stopped
-    environment:
-      DOCKER_VERNEMQ_LISTENER__TCP__ALLOWED_PROTOCOL_VERSIONS: 5
-      DOCKER_VERNEMQ_ALLOW_ANONYMOUS: "on"
-
   directory:
     build: .
     ports:
