@@ -127,8 +127,8 @@ public class DirectoryContainer {
                     else
                         string += ("\t" + "Device name: " + capability.capability_name + "\n" +
                                 "\t" + "Device IP: " + capability.ip + "\n" +
-                                "Description: " + capability.description + "\n" +
-                                "Is online: " + capability.isOnline + "\n\n");
+                                "\t"+"Description: " + capability.description + "\n" +
+                               "\t"+ "Is online: " + capability.isOnline + "\n\n");
                 }
             }
         }
@@ -146,8 +146,8 @@ public class DirectoryContainer {
                 else
                     string+=("&emsp;"+"Device name: "+capability.capability_name+"<br>" +
                             "&emsp;"+"Device IP: "+capability.ip +"<br>"+
-                            "Description: "+capability.description+"<br>"+
-                            "Is online: "+capability.isOnline+"<br><br>");
+                            "&emsp;"+ "Description: "+capability.description+"<br>"+
+                            "&emsp;"+  "Is online: "+capability.isOnline+"<br><br>");
             }
         }
         return string;
@@ -164,8 +164,8 @@ public class DirectoryContainer {
                 else if(capability.isOnline)
                     string+= "&emsp;"+"Device name: "+capability.capability_name+"<br>" +
                             "&emsp;"+"Device IP: "+capability.ip +"<br>"+
-                            "Description: "+capability.description+"<br>"+
-                            "Is online: "+ true +"<br><br>";
+                            "&emsp;"+ "Description: "+capability.description+"<br>"+
+                            "&emsp;"+"Is online: "+ true +"<br><br>";
             }
         }
         return string;
