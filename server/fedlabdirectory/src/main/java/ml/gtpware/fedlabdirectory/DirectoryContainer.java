@@ -64,14 +64,18 @@ public class DirectoryContainer {
 
     public String prettyFormattedCapabilities(){
         String string=new String("CAPABILITIES:\n");
-        for(Object arrayList : capabilities){
-            string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"\n";
-            for(Capability capability : (ArrayList<Capability>)arrayList){
-                string+=("\t"+"Capability name: "+capability.capability_name+"\n" +
-                        "\t"+"Capability description: "+capability.description+"\n"+
-                        "\t"+"Capability IP: "+capability.ip +"\n" +
-                        "\t"+"Capability port: "+capability.gateway_port+"\n"+
-                        "\t"+"Is online: " +capability.isOnline+"\n\n");
+        for(ArrayList<Capability> arrayList : capabilities){
+            if(!arrayList.isEmpty()) {
+
+
+                string += "Party: " + arrayList.get(0).party_name + "\n";
+                for (Capability capability : arrayList) {
+                    string += ("\t" + "Capability name: " + capability.capability_name + "\n" +
+                            "\t" + "Capability description: " + capability.description + "\n" +
+                            "\t" + "Capability IP: " + capability.ip + "\n" +
+                            "\t" + "Capability port: " + capability.gateway_port + "\n" +
+                            "\t" + "Is online: " + capability.isOnline + "\n\n");
+                }
             }
         }
         return string;
@@ -112,17 +116,20 @@ public class DirectoryContainer {
 
     public String prettyFormattedDevices(){
         String string=new String("DEVICES:\n");
-        for(Object arrayList : devices){
-            string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"\n";
-            for(Capability capability : (ArrayList<Capability>)arrayList){
-                if(capability.description==null)
-                    string+=("\t"+"Device name: "+capability.capability_name+"\n" +
-                            "\t"+"Device IP: "+capability.ip +"\n\n");
-                else
-                    string+=("\t"+"Device name: "+capability.capability_name+"\n" +
-                            "\t"+"Device IP: "+capability.ip +"\n"+
-                            "Description: "+capability.description+"\n"+
-                            "Is online: "+capability.isOnline+"\n\n");
+        for(ArrayList<Capability> arrayList : devices){
+            if(!arrayList.isEmpty()) {
+                string += "Party: " + arrayList.get(0).party_name + "\n";
+
+                for (Capability capability : arrayList) {
+                    if (capability.description == null)
+                        string += ("\t" + "Device name: " + capability.capability_name + "\n" +
+                                "\t" + "Device IP: " + capability.ip + "\n\n");
+                    else
+                        string += ("\t" + "Device name: " + capability.capability_name + "\n" +
+                                "\t" + "Device IP: " + capability.ip + "\n" +
+                                "Description: " + capability.description + "\n" +
+                                "Is online: " + capability.isOnline + "\n\n");
+                }
             }
         }
         return string;
@@ -193,11 +200,11 @@ public class DirectoryContainer {
     }
 
     public void removeDevice(RemoveRequest request){
-        for(Object arraylist : devices){    //First, find and remove the device
+        outer: for(Object arraylist : devices){    //First, find and remove the device
             for(Capability device : (ArrayList<Capability>)arraylist){
                 if(device.ip.equals(request.identifier)){
                     ((ArrayList<Capability>) arraylist).remove(device);
-                    return; //Assuming no duplicates TODO: prevent duplicates
+                    break outer;
                 }
             }
         }
