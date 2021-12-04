@@ -43,8 +43,7 @@ f.close()
 def get_directory():
     resp = requests.get("{}/directory".format(SERVER))
     
-    print("{}".format(resp.text))
-    return resp.content
+    return "{}".format(resp.text)
 
 
 def get_capabilities():
@@ -195,7 +194,7 @@ def check_args(mac, name, desc, expose):
         if name is None or desc is None:
             print("-n and -d are required with the -e flag")
             return
-    
+
     mac = (mac.replace("-", ":")).lower()
     if re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", mac):
         add_device(mac, name, desc, expose)
