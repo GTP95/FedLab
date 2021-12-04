@@ -22,8 +22,9 @@ import json
 import os
 import requests
 import re
+import uuid
 
-SERVER = "localhost:8080"
+SERVER = "http://192.168.201.3:8080"
 partyNickname = ""
 GATEWAY_IP = ""
 
@@ -39,17 +40,22 @@ f = open("/home/vagrant/partynickname.txt", "r")
 partyNickname = f.readline()
 f.close()
 
+def get_directory():
+    resp = requests.get("{}/directory".format(SERVER))
+    
+    print("{}".format(resp.text))
+    return resp.content
+
 
 def get_capabilities():
     resp = requests.get("{}/capabilities".format(SERVER))
 
     # return body
-    print(resp.content)
     return resp.content
 
 
 def post_capability(capability_object):
-    resp = requests.post("{}/capabilities".format(SERVER), data = capability_object)
+    resp = requests.post("{}/capabilities".format(SERVER), json = capability_object)
 
     print(resp.content)
 
@@ -58,12 +64,17 @@ def get_devices():
     resp = requests.get("{}/devices".format(SERVER))
 
     # return body
-    print(resp.content)
     return resp.content
 
 
 def post_device(device_object):
-    resp = requests.post("{}/devices".format(SERVER), data = device_object)
+    resp = requests.post("{}/devices".format(SERVER), json = device_object)
+
+    print(resp.content)
+
+
+def remote_remove_device(remove_device_object):
+    resp = requests.post("{}/removeDeviceRequest".format(SERVER), json = remove_device_object)
 
     print(resp.content)
 
@@ -94,24 +105,26 @@ def construct_empty_directory():
         f.write(json.dumps({"capabilities": []}))
 
 
-def construct_local_capability_object(ip, device_port, name, desc):
+def construct_local_capability_object(ip, device_port, name, desc, uuid):
     return {
         "device": ip,
         "device_port": device_port,
         "capability_name": name,
         "description": desc,
-        "is_capability": True
+        "is_capability": True,
+        "uuid": uuid
     }
 
 
-def construct_remote_capability_object(device_ip, port, name, desc):
+def construct_remote_capability_object(device_ip, port, name, desc, uuid):
     return {
         "party_name": partyNickname,
         "gateway_ip": device_ip,
         "gateway_port": port,
         "capability_name": name,
         "description": desc,
-        "is_capability": True
+        "is_capability": True,
+        "uuid": uuid
     }
 
 
@@ -136,15 +149,22 @@ def construct_remote_device_object(device_ip, name, desc):
     }
 
 
+def construct_remove_device_object(device_ip):
+    return  {
+        "identifier": device_ip
+    }
+
+
 def add_capability(ip, device_port, name, desc):
     cap_directory = read_directory()
 
+    capability_uuid = str(uuid.uuid4())
     new_capability = construct_local_capability_object(
-        ip, device_port, name, desc)
+        ip, device_port, name, desc, capability_uuid)
     cap_directory["capabilities"].append(new_capability)
 
     remote_capability_object = construct_remote_capability_object(
-        ip, device_port, name, desc)
+        ip, device_port, name, desc, capability_uuid)
     post_capability(remote_capability_object)
 
     add_capability_rules(ip, device_port)
@@ -214,8 +234,9 @@ def add_device(mac, name, desc, expose):
         expose_device(ip, name, desc)
 
 
-def remove_device():
-    # TODO
+def remove_device(device_ip):
+    remote_remove_device(construct_remove_device_object(device_ip))
+    # TODO do more stuff
     pass
 
 
