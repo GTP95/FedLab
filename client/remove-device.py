@@ -9,12 +9,12 @@ if __name__ == "__main__":
     os.chdir(path)
 
     parser = argparse.ArgumentParser(
-        description="Utility to remove capabilities exposed by the bundle box.")
+        description="Utility to remove devices exposed by the bundle box.")
 
-    parser.add_argument("-i", "--id", metavar="capability_id", type=str, required=True,
-                        help="The UUID of the to-be-removed capability.")
+    parser.add_argument("-i", "--ip", metavar="device_ip", type=str, required=True,
+                        help="The IP address of the to-be-removed device.")
 
     args = parser.parse_args()
 
-    manage_capabilities.remove_capability(args.id)
+    manage_capabilities.remove_device(args.id)
     manage_capabilities.pretty_print_directory()  # todo: remove
