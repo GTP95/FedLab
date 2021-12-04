@@ -63,48 +63,82 @@ public class DirectoryContainer {
     }
 
     public String prettyFormattedCapabilities(){
-        String string=new String("CAPABILITIES:<br>");
+        String string=new String("CAPABILITIES:\n");
         for(Object arrayList : capabilities){
-            string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"<br>";
+            string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"\n";
             for(Capability capability : (ArrayList<Capability>)arrayList){
-                string+=("    &emsp;"+"Capability name: "+capability.capability_name+"<br>" +
-                        "    &emsp;"+"Capability description: "+capability.description+"<br>"+
-                        "    &emsp;"+"Capability IP: "+capability.ip +"<br>" +
-                        "    &emsp;"+"Capability port: "+capability.gateway_port+"<br>"+
-                        "    &emsp;"+"Is online: " +capability.isOnline+"<br><br>");
+                string+=("\t"+"Capability name: "+capability.capability_name+"\n" +
+                        "\t"+"Capability description: "+capability.description+"\n"+
+                        "\t"+"Capability IP: "+capability.ip +"\n" +
+                        "\t"+"Capability port: "+capability.gateway_port+"\n"+
+                        "\t"+"Is online: " +capability.isOnline+"\n\n");
             }
         }
         return string;
 
     }
 
-    public String prettyFormattedOnlineCapabiilities(){
+    public String prettyFormattedHTMLcapabilities(){
+        String string=new String("CAPABILITIES:<br>");
+        for(Object arrayList : capabilities){
+            string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"<br>";
+            for(Capability capability : (ArrayList<Capability>)arrayList){
+                string+=("&emsp;"+"Capability name: "+capability.capability_name+"<br>" +
+                        "&emsp;"+"Capability description: "+capability.description+"<br>"+
+                        "&emsp;"+"Capability IP: "+capability.ip +"<br>" +
+                        "&emsp;"+"Capability port: "+capability.gateway_port+"<br>"+
+                        "&emsp;"+"Is online: " +capability.isOnline+"<br><br>");
+            }
+        }
+        return string;
+
+    }
+
+    public String prettyFormattedHTMLonlineCapabiilities(){
         String string=new String("CAPABILITIES:<br>");
         for(Object arrayList : capabilities){
             string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"<br>";
             for(Capability capability : (ArrayList<Capability>)arrayList){
                 if(capability.isOnline)
-                    string+=("    &emsp;"+"Capability name: "+capability.capability_name+"<br>" +
-                        "    &emsp;"+"Capability description: "+capability.description+"<br>"+
-                        "    &emsp;"+"Capability IP: "+capability.ip +"<br>" +
-                        "    &emsp;"+"Capability port: "+capability.gateway_port+"<br>"+
-                        "    &emsp;"+"Is online: " +capability.isOnline+"<br><br>");
+                    string+=("&emsp;"+"Capability name: "+capability.capability_name+"<br>" +
+                        "&emsp;"+"Capability description: "+capability.description+"<br>"+
+                        "&emsp;"+"Capability IP: "+capability.ip +"<br>" +
+                        "&emsp;"+"Capability port: "+capability.gateway_port+"<br>"+
+                        "&emsp;"+"Is online: " +capability.isOnline+"<br><br>");
             }
         }
         return string;
     }
 
     public String prettyFormattedDevices(){
+        String string=new String("DEVICES:\n");
+        for(Object arrayList : devices){
+            string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"\n";
+            for(Capability capability : (ArrayList<Capability>)arrayList){
+                if(capability.description==null)
+                    string+=("\t"+"Device name: "+capability.capability_name+"\n" +
+                            "\t"+"Device IP: "+capability.ip +"\n\n");
+                else
+                    string+=("\t"+"Device name: "+capability.capability_name+"\n" +
+                            "\t"+"Device IP: "+capability.ip +"\n"+
+                            "Description: "+capability.description+"\n"+
+                            "Is online: "+capability.isOnline+"\n\n");
+            }
+        }
+        return string;
+    }
+
+    public String prettyFormattedHTMLdevices(){
         String string=new String("DEVICES:<br>");
         for(Object arrayList : devices){
             string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"<br>";
             for(Capability capability : (ArrayList<Capability>)arrayList){
                 if(capability.description==null)
-                    string+=("    &emsp;"+"Device name: "+capability.capability_name+"<br>" +
-                            "    &emsp;"+"Device IP: "+capability.ip +"<br><br>");
+                    string+=("&emsp;"+"Device name: "+capability.capability_name+"<br>" +
+                            "&emsp;"+"Device IP: "+capability.ip +"<br><br>");
                 else
-                    string+=("    &emsp;"+"Device name: "+capability.capability_name+"<br>" +
-                            "    &emsp;"+"Device IP: "+capability.ip +"<br>"+
+                    string+=("&emsp;"+"Device name: "+capability.capability_name+"<br>" +
+                            "&emsp;"+"Device IP: "+capability.ip +"<br>"+
                             "Description: "+capability.description+"<br>"+
                             "Is online: "+capability.isOnline+"<br><br>");
             }
@@ -112,17 +146,17 @@ public class DirectoryContainer {
         return string;
     }
 
-    public String prettyFormattedOnlineDevices(){
+    public String prettyFormattedHTMLonlineDevices(){
         String string=new String("DEVICES:<br>");
         for(Object arrayList : devices){
             string+="Party: " + ((ArrayList<Capability>)arrayList).get(0).party_name +"<br>";
             for(Capability capability : (ArrayList<Capability>)arrayList){
                 if(capability.description==null && capability.isOnline)
-                    string+=("    &emsp;"+"Device name: "+capability.capability_name+"<br>" +
-                            "    &emsp;"+"Device IP: "+capability.ip +"<br><br>");
+                    string+=("&emsp;"+"Device name: "+capability.capability_name+"<br>" +
+                            "&emsp;"+"Device IP: "+capability.ip +"<br><br>");
                 else if(capability.isOnline)
-                    string+= "    &emsp;"+"Device name: "+capability.capability_name+"<br>" +
-                            "    &emsp;"+"Device IP: "+capability.ip +"<br>"+
+                    string+= "&emsp;"+"Device name: "+capability.capability_name+"<br>" +
+                            "&emsp;"+"Device IP: "+capability.ip +"<br>"+
                             "Description: "+capability.description+"<br>"+
                             "Is online: "+ true +"<br><br>";
             }
@@ -168,7 +202,7 @@ public class DirectoryContainer {
             }
         }
 
-        for (Object arraylist : capabilities){  //Then remove all associated capabilities
+        for (Object arraylist : capabilities){  // then remove all associated capabilities
             for(Capability capability : (ArrayList<Capability>)arraylist){
                 if(capability.ip.equals(request.identifier)){
                     ((ArrayList<Capability>) arraylist).remove(capability);

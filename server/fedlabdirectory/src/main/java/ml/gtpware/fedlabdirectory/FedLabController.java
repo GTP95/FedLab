@@ -2,7 +2,6 @@ package ml.gtpware.fedlabdirectory;
 
 import com.github.lalyos.jfiglet.FigletFont;
 import org.springframework.web.bind.annotation.*;
-import org.unbescape.html.HtmlEscape;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,19 +27,28 @@ public class FedLabController {
     }
 
     @RequestMapping(value = "/HTMLdirectory" , method = RequestMethod.GET, produces = "text/html")
-    public String prettyFormattedDirectory(@RequestParam(value = "showOnlineOnly", required = false) String checkboxvalue) {
+    String prettyFormattedHTMLdirectory(@RequestParam(value = "showOnlineOnly", required = false) String checkboxvalue) {
         String result;
         if(checkboxvalue==null) {
 
-                result = "<html><title>FedLab directory</title>" + directoryContainer.prettyFormattedCapabilities() + directoryContainer.prettyFormattedDevices()+"</html>";
+                result = "<html><title>FedLab directory</title>" + directoryContainer.prettyFormattedHTMLcapabilities() + directoryContainer.prettyFormattedHTMLdevices()+"</html>";
 
         }
         else {
 
-                result = "<html><title>FedLab directory</title>" + directoryContainer.prettyFormattedOnlineCapabiilities() + directoryContainer.prettyFormattedOnlineDevices()+"</html>";
+                result = "<html><title>FedLab directory</title>" + directoryContainer.prettyFormattedHTMLonlineCapabiilities() + directoryContainer.prettyFormattedHTMLonlineDevices()+"</html>";
 
         }
         return result;
+    }
+
+    @GetMapping("/directory")
+    String prettyFormattedDirectory(){
+        try{
+           return FigletFont.convertOneLine("FedLab directory")+directoryContainer.prettyFormattedCapabilities()+directoryContainer.prettyFormattedDevices();
+        } catch (IOException e) {
+            return "FedLab directory"+directoryContainer.prettyFormattedCapabilities()+directoryContainer.prettyFormattedDevices();
+        }
     }
 
     @RequestMapping(value="/capabilities", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
