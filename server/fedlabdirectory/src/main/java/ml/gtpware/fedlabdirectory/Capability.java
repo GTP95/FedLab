@@ -2,6 +2,8 @@ package ml.gtpware.fedlabdirectory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 public class Capability{
     //Not following Java convention to reflect the name of the Json's fields
     @JsonProperty("party_name") String party_name;
@@ -22,4 +24,22 @@ public class Capability{
         this.is_capability=is_capability;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Capability that = (Capability) o;
+        return gateway_port == that.gateway_port &&
+                is_capability == that.is_capability &&
+                party_name.equals(that.party_name) &&
+                ip.equals(that.ip) &&
+                capability_name.equals(that.capability_name) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(uuid, that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(party_name, ip, gateway_port, capability_name, description, is_capability, uuid);
+    }
 }

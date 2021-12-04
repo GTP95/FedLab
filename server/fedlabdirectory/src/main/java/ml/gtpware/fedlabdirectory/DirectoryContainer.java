@@ -1,17 +1,15 @@
 package ml.gtpware.fedlabdirectory;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class DirectoryContainer {
     private final ArrayList<ArrayList<Capability>> capabilities, devices;
-    private final ArrayList<String> capabilitiesParties, devicesParties;
     private static DirectoryContainer instance;
 
     private DirectoryContainer(){
         capabilities=new ArrayList<ArrayList<Capability>>();
         devices=new ArrayList<ArrayList<Capability>>();
-        capabilitiesParties=new ArrayList<>();
-        devicesParties=new ArrayList<>();
     }
 
     public static DirectoryContainer getInstance(){
@@ -23,43 +21,39 @@ public class DirectoryContainer {
         if(capabilities.isEmpty()){
             capabilities.add(new ArrayList<Capability>());
             capabilities.get(0).add(capability);
-            capabilitiesParties.add(capability.party_name);
             return;
         }
-        if(capabilitiesParties.contains(capability.party_name)){
-            for(Object arrayList : capabilities){
-                if(!((ArrayList<Capability>)arrayList).isEmpty() && ((ArrayList<Capability>)arrayList).get(0).party_name.equals(capability.party_name)){
-                    ((ArrayList<Capability>)arrayList).add(capability);
-                    break;
-                }
+        //look if the party sharing the capability is already present. If so, add the capability to the party's ArrayList
+        for(ArrayList<Capability> arrayList : capabilities){
+            if(!arrayList.isEmpty() && arrayList.get(0).party_name.equals(capability.party_name)){
+                arrayList.add(capability);
+                return;
             }
         }
-        else{
-            capabilities.add(new ArrayList<Capability>());
-            capabilities.get(capabilities.size()-1).add(capability);
-            capabilitiesParties.add(capability.party_name);
-        }
+
+        //Else the party isn't already present, so we need ot create a new ArrayList for that party and add the capability there
+        capabilities.add(new ArrayList<Capability>());
+        capabilities.get(capabilities.size()-1).add(capability);
     }
 
     public void addDevice(Capability device){
         if(devices.isEmpty()){
             devices.add(new ArrayList<Capability>());
             devices.get(0).add(device);
-            devicesParties.add(device.party_name);
             return;
         }
-        if(devicesParties.contains(device.party_name)){
-            for(Object arrayList : devices){
-                if(!((ArrayList<Capability>)arrayList).isEmpty() && ((ArrayList<Capability>)arrayList).get(0).party_name.equals(device.party_name)){
-                    ((ArrayList<Capability>)arrayList).add(device);
-                    break;
-                }
+
+        //Look if the party sharing the device is already present. If yes, add the capability to its ArrayList
+        for(ArrayList<Capability> arrayList : devices){
+            if(!arrayList.isEmpty() && arrayList.get(0).party_name.equals(device.party_name)){
+                arrayList.add(device);
+                return;
             }
         }
-        else {
-            capabilities.add(new ArrayList<Capability>());
-            devicesParties.add(device.party_name);
-        }
+
+        //Else the party isn't already there, so we need to create a new ArrayList and add there the device
+        devices.add(new ArrayList<Capability>());
+        devices.get(devices.size()-1).add(device);
     }
 
     public String prettyFormattedCapabilities(){
@@ -209,10 +203,11 @@ public class DirectoryContainer {
             }
         }
 
-        for (Object arraylist : capabilities){  // then remove all associated capabilities
-            for(Capability capability : (ArrayList<Capability>)arraylist){
+        for (ArrayList<Capability> arraylist : capabilities){  // then remove all associated capabilities
+            for(Iterator<Capability> iterator=arraylist.iterator(); iterator.hasNext();){   //Have to use an iterator here to avoid ConcurrentModificationException
+                Capability capability=iterator.next();
                 if(capability.ip.equals(request.identifier)){
-                    ((ArrayList<Capability>) arraylist).remove(capability);
+                    iterator.remove();
                 }
             }
         }
@@ -223,6 +218,7 @@ public class DirectoryContainer {
             for(Capability capability : (ArrayList<Capability>)arraylist){
                 if(capability.uuid.equals(request.identifier)){
                     ((ArrayList<Capability>) arraylist).remove(capability); //Again assuming no duplicates TODO: prevent duplicates
+                    return;
                 }
             }
         }
