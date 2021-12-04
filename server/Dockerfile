@@ -1,7 +1,6 @@
-FROM python:3.9.5-buster
+FROM ubuntu:20.04
 
 # Install server_subscriber.py's dependencies
-RUN pip install paho-mqtt argparse
 RUN mkdir /server-subscriber
 
 # Install & configure Java 11
@@ -9,13 +8,9 @@ ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 RUN apt-get -y update && apt-get -y install openjdk-11-jdk
 ENV PATH=$PATH:${JAVA_HOME}/bin
 
-# Install web server
-RUN apt-get -y install apache2
-
 # Copy the needed software
-COPY server_subscriber.py /server-subscriber/server_subscriber.py
-ARG src="device-directory/out/artifacts/Device_Directory_jar/Device Directory.jar"
-COPY ${src} /server-subscriber/device_directory.jar
+ARG src="fedlabdirectory/target/fedlabdirectory-0.0.1-SNAPSHOT.jar"
+COPY ${src} /server-subscriber/fedlab_directory.jar
 COPY start.sh /server-subscriber/start.sh
 
 run chmod +x /server-subscriber/start.sh
