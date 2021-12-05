@@ -36,7 +36,7 @@ public class DirectoryContainer {
         capabilities.get(capabilities.size()-1).add(capability);
     }
 
-    public void addDevice(Capability device){
+    public synchronized void addDevice(Capability device){
         if(devices.isEmpty()){
             devices.add(new ArrayList<Capability>());
             devices.get(0).add(device);
@@ -56,7 +56,7 @@ public class DirectoryContainer {
         devices.get(devices.size()-1).add(device);
     }
 
-    public String prettyFormattedCapabilities(){
+    public synchronized String prettyFormattedCapabilities(){
         String string=new String("CAPABILITIES:\n");
         for(ArrayList<Capability> arrayList : capabilities){
             if(!arrayList.isEmpty()) {
@@ -76,12 +76,12 @@ public class DirectoryContainer {
 
     }
 
-    public String prettyFormattedHTMLcapabilities(){
+    public synchronized String prettyFormattedHTMLcapabilities(){
         String string=new String("CAPABILITIES:<br>");
         for(ArrayList<Capability> arrayList : capabilities){
             if(!arrayList.isEmpty()) {
-                string += "Party: " + ((ArrayList<Capability>) arrayList).get(0).party_name + "<br>";
-                for (Capability capability : (ArrayList<Capability>) arrayList) {
+                string += "Party: " +  arrayList.get(0).party_name + "<br>";
+                for (Capability capability : arrayList) {
                     string += ("&emsp;" + "Capability name: " + capability.capability_name + "<br>" +
                             "&emsp;" + "Capability description: " + capability.description + "<br>" +
                             "&emsp;" + "Capability IP: " + capability.ip + "<br>" +
@@ -94,12 +94,12 @@ public class DirectoryContainer {
 
     }
 
-    public String prettyFormattedHTMLonlineCapabilities(){
+    public synchronized String prettyFormattedHTMLonlineCapabilities(){
         String string=new String("CAPABILITIES:<br>");
         for(ArrayList<Capability> arrayList : capabilities){
             if(!arrayList.isEmpty()) {
-                string += "Party: " + ((ArrayList<Capability>) arrayList).get(0).party_name + "<br>";
-                for (Capability capability : (ArrayList<Capability>) arrayList) {
+                string += "Party: " + arrayList.get(0).party_name + "<br>";
+                for (Capability capability : arrayList) {
                     if (capability.isOnline)
                         string += ("&emsp;" + "Capability name: " + capability.capability_name + "<br>" +
                                 "&emsp;" + "Capability description: " + capability.description + "<br>" +
@@ -112,7 +112,7 @@ public class DirectoryContainer {
         return string;
     }
 
-    public String prettyFormattedDevices(){
+    public synchronized String prettyFormattedDevices(){
         String string=new String("DEVICES:\n");
         for(ArrayList<Capability> arrayList : devices){
             if(!arrayList.isEmpty()) {
@@ -133,12 +133,12 @@ public class DirectoryContainer {
         return string;
     }
 
-    public String prettyFormattedHTMLdevices(){
+    public synchronized String prettyFormattedHTMLdevices(){
         String string=new String("DEVICES:<br>");
         for(ArrayList<Capability> arrayList : devices){
             if(!arrayList.isEmpty()) {
-                string += "Party: " + ((ArrayList<Capability>) arrayList).get(0).party_name + "<br>";
-                for (Capability capability : (ArrayList<Capability>) arrayList) {
+                string += "Party: " + arrayList.get(0).party_name + "<br>";
+                for (Capability capability : arrayList) {
                     if (capability.description == null)
                         string += ("&emsp;" + "Device name: " + capability.capability_name + "<br>" +
                                 "&emsp;" + "Device IP: " + capability.ip + "<br><br>");
@@ -153,12 +153,12 @@ public class DirectoryContainer {
         return string;
     }
 
-    public String prettyFormattedHTMLonlineDevices(){
+    public synchronized String prettyFormattedHTMLonlineDevices(){
         String string=new String("DEVICES:<br>");
         for(ArrayList<Capability> arrayList : devices){
             if(!arrayList.isEmpty()) {
-                string += "Party: " + ((ArrayList<Capability>) arrayList).get(0).party_name + "<br>";
-                for (Capability capability : (ArrayList<Capability>) arrayList) {
+                string += "Party: " + arrayList.get(0).party_name + "<br>";
+                for (Capability capability : arrayList) {
                     if (capability.description == null && capability.isOnline)
                         string += ("&emsp;" + "Device name: " + capability.capability_name + "<br>" +
                                 "&emsp;" + "Device IP: " + capability.ip + "<br><br>");
@@ -173,15 +173,15 @@ public class DirectoryContainer {
         return string;
     }
 
-    public ArrayList<ArrayList<Capability>> getCapabilities() {
+    public ArrayList<ArrayList<Capability>> getCapabilities() { //retuns an immutable reference, no need for synchronization
         return capabilities;
     }
 
-    public ArrayList<ArrayList<Capability>> getDevices() {
+    public ArrayList<ArrayList<Capability>> getDevices() {  //retuns an immutable reference, no need for synchronization
         return devices;
     }
 
-    public void statusUpdate(StatusUpdate statusUpdate){    //updates the online status of a capability or device
+    public synchronized void statusUpdate(StatusUpdate statusUpdate){    //updates the online status of a capability or device
         for(Object arrayList : capabilities){
             for (Capability capability : (ArrayList<Capability>)arrayList){
                 if(capability.ip.equals(statusUpdate.ip)){
@@ -201,7 +201,7 @@ public class DirectoryContainer {
         }
     }
 
-    public void removeDevice(RemoveRequest request){
+    public synchronized void removeDevice(RemoveRequest request){
         outer: for(Object arraylist : devices){    //First, find and remove the device
             for(Capability device : (ArrayList<Capability>)arraylist){
                 if(device.ip.equals(request.identifier)){
@@ -221,7 +221,7 @@ public class DirectoryContainer {
         }
     }
 
-    public void removeCapability(RemoveRequest request){
+    public synchronized void removeCapability(RemoveRequest request){
         for(Object arraylist : devices){
             for(Capability capability : (ArrayList<Capability>)arraylist){
                 if(capability.uuid.equals(request.identifier)){
