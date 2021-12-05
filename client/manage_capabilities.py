@@ -97,8 +97,8 @@ def remote_remove_device(remove_device_object):
 
 
 # only called implicitly (i.e. not from any user-operated scripts)
-def device_status_update(device_status_update):
-    resp = requests.post("{}/statusUpdate".format(SERVER), json = device_status_update)
+def post_status_update(ip, status):
+    resp = requests.post("{}/statusUpdate".format(SERVER), json = {"ip": ip, "isOnline": status})
 
 
 def read_directory():

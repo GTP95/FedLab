@@ -5,11 +5,10 @@ import re
 from watchdog.observers import Observer
 from watchdog.events import *
 import math
+import manage_capabilities
 
 # 2 weeks
 TTL = 14*24*60*60
-SERVER = "10.0.2.2"
-PORT = 1883
 
 
 class AclEntry:
@@ -95,36 +94,31 @@ class ArpChangeHandler(FileSystemEventHandler):
                 acl[mac_addr].last_used = current_time
                 if entry.status == "offline":
                     acl[mac_addr].status = "online"
-                    # mqtt_client.publish_device_update(
-                    # acl[mac_addr].mac_addr, "online")
+                    manage_capabilities.post_status_update(acl[mac_addr].ip, True)
 
             # If a registered MAC address was not found in the ARP table and
             # has not been connected for at least TTL seconds, remove it from the list.
             elif acl[mac_addr].last_used + TTL < current_time:
                 del acl[mac_addr]
-                os.system("sudo manage_acl.sh remove {}".format(mac_addr))
+                manage_capabilities.remove_device(acl[mac_addr].ip)
 
             # MAC address was not in found in the ARP table, but has not yet expired
             # If the device was online before, an update will be sent to the server.
             else:
                 if acl[mac_addr].status == "online":
                     acl[mac_addr].status = "offline"
-                    # mqtt_client.publish_device_update(
-                    # acl[mac_addr].mac_addr, "offline")
+                    manage_capabilities.post_status_update(acl[mac_addr].ip, False)
 
         suffix = '\n' if len(acl) > 0 else ''
         with open("MAC_addresses", 'w') as file:
             file.write('\n'.join(map(lambda x: str(x), acl.values())) + suffix)
 
 
-class MqttDeviceStatusManager:
-    def publish_device_update(self, mac_addr, status):
-        # use MQTT-CLI to publish the message
-        os.system(
-            "mqtt pub -h {} -t device_status_update -m '{} {}'".format(SERVER, mac_addr, status))
 
-
-mqtt_client = MqttDeviceStatusManager()
+def publish_device_update(self, mac_addr, status):
+    # use MQTT-CLI to publish the message
+    os.system(
+        "mqtt pub -h {} -t device_status_update -m '{} {}'".format(SERVER, mac_addr, status))
 
 
 def init_files_if_not_exists():
