@@ -17,7 +17,7 @@ public class DirectoryContainer {
         return instance;
     }
 
-    public void addCapability(Capability capability){
+    public synchronized void addCapability(Capability capability){
         if(capabilities.isEmpty()){
             capabilities.add(new ArrayList<Capability>());
             capabilities.get(0).add(capability);
