@@ -27,4 +27,3 @@ if __name__ == "__main__":
 
     manage_capabilities.add_capability(
         args.ip, args.port, args.name, args.desc)
-    manage_capabilities.pretty_print_directory()  # todo: remove

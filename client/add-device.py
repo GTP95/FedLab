@@ -27,4 +27,3 @@ if __name__ == "__main__":
 
     manage_capabilities.check_args(
         args.mac, args.name, args.desc, args.expose_device)
-    manage_capabilities.pretty_print_directory()  # todo: remove
