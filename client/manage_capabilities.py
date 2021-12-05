@@ -42,9 +42,8 @@ f.close()
 
 def get_directory():
     resp = requests.get("{}/directory".format(SERVER))
-    
-    print("{}".format(resp.text))
-    return resp.content
+
+    return "{}".format(resp.text)
 
 
 def get_capabilities():
@@ -56,6 +55,12 @@ def get_capabilities():
 
 def post_capability(capability_object):
     resp = requests.post("{}/capabilities".format(SERVER), json = capability_object)
+
+    print(resp.content)
+
+
+def remote_remove_capability(remote_remove_capability_object):
+    resp = requests.post("{}/removeCapabilityRequest".format(SERVER), json = remote_remove_capability_object)
 
     print(resp.content)
 
@@ -138,6 +143,12 @@ def construct_local_device_object(device_ip, name, desc):
     }
 
 
+def construct_remote_remove_capability_object(uuid):
+    return  {
+        "identifier": uuid
+    }
+
+
 def construct_remote_device_object(device_ip, name, desc):
     return {
         "party_name": partyNickname,
@@ -173,20 +184,8 @@ def add_capability(ip, device_port, name, desc):
 
 
 def remove_capability(uuid):
-    # TODO: fix this, since ID is no longer there
-
-    # cap_directory = read_directory()
-    # print(cap_directory['capabilities'])
-    #
-    # # only keep items that do not have the specified UUID
-    # cap_directory['capabilities'] = list(filter(
-    #     lambda x: x["capability_id"] != uuid,
-    #     cap_directory['capabilities'])
-    # )
-    #
-    # mqtt_client.publish_capability_update("remove", uuid)
-    #
-    # write_directory(cap_directory)
+    remote_remove_capability(construct_remote_remove_capability_object(uuid))
+    # TODO do more stuff
     pass
 
 
@@ -195,7 +194,7 @@ def check_args(mac, name, desc, expose):
         if name is None or desc is None:
             print("-n and -d are required with the -e flag")
             return
-    
+
     mac = (mac.replace("-", ":")).lower()
     if re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", mac):
         add_device(mac, name, desc, expose)
