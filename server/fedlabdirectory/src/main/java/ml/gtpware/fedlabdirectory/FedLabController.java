@@ -36,7 +36,7 @@ public class FedLabController {
         }
         else {
 
-                result = "<html><title>FedLab directory</title>" + directoryContainer.prettyFormattedHTMLonlineCapabiilities() + directoryContainer.prettyFormattedHTMLonlineDevices()+"</html>";
+                result = "<html><title>FedLab directory</title>" + directoryContainer.prettyFormattedHTMLonlineCapabilities() + directoryContainer.prettyFormattedHTMLonlineDevices()+"</html>";
 
         }
         return result;
