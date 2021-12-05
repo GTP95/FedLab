@@ -56,13 +56,19 @@ def get_capabilities():
 def post_capability(capability_object):
     resp = requests.post("{}/capabilities".format(SERVER), json = capability_object)
 
-    print(resp.content)
+    if (resp.status_code == 200):
+        print("Capability was successfully posted to the directory.")
+    else:
+        print("Posting a capability to the directory failed with status code {}".format(resp.status_code))
 
 
 def remote_remove_capability(remote_remove_capability_object):
     resp = requests.post("{}/removeCapabilityRequest".format(SERVER), json = remote_remove_capability_object)
 
-    print(resp.content)
+    if (resp.status_code == 200):
+        print("Capability was successfully removed from the directory.")
+    else:
+        print("Removing a capability from the directory failed with status code {}".format(resp.status_code))
 
 
 def get_devices():
@@ -75,13 +81,23 @@ def get_devices():
 def post_device(device_object):
     resp = requests.post("{}/devices".format(SERVER), json = device_object)
 
-    print(resp.content)
+    if (resp.status_code == 200):
+        print("Device was successfully posted to the directory.")
+    else:
+        print("Posting a device to the directory failed with status code {}".format(resp.status_code))
 
 
 def remote_remove_device(remove_device_object):
     resp = requests.post("{}/removeDeviceRequest".format(SERVER), json = remove_device_object)
 
-    print(resp.content)
+    if (resp.status_code == 200):
+        print("Device was successfully removed from the directory.")
+    else:
+        print("Removing a device from the directory failed with status code {}".format(resp.status_code))
+
+
+def device_status_update(device_status_update):
+    resp = requests.post("{}//statusUpdate".format(SERVER), json = device_status_update)
 
 
 def read_directory():
