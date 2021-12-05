@@ -96,8 +96,14 @@ def remote_remove_device(remove_device_object):
         print("Removing a device from the directory failed with status code {}".format(resp.status_code))
 
 
+<<<<<<< Updated upstream
 def device_status_update(device_status_update):
     resp = requests.post("{}//statusUpdate".format(SERVER), json = device_status_update)
+=======
+# only called implicitly (i.e. not from any user-operated scripts)
+def device_status_update(device_status_update):
+    resp = requests.post("{}/statusUpdate".format(SERVER), json = device_status_update)
+>>>>>>> Stashed changes
 
 
 def read_directory():
