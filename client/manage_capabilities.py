@@ -202,8 +202,26 @@ def add_capability(ip, device_port, name, desc):
 
 def remove_capability(uuid):
     remote_remove_capability(construct_remote_remove_capability_object(uuid))
-    # TODO do more stuff
-    pass
+
+    with open("local_capability_directory", "r") as json_file:
+        data = json.load(json_file)
+
+    cap_directory = {"capabilities": []}
+    ip = ""
+    device_port = ""
+    for capability in data['capabilities']:
+        if capability['is_capability']:
+            if capability['uuid'] == uuid:
+                ip = capability['device']
+                device_port = capability['device_port']
+            else:
+                cap_directory["capabilities"].append(capability)
+        else:
+            cap_directory["capabilities"].append(capability)
+
+    remove_capability_rules(ip, device_port)
+
+    write_directory(cap_directory)
 
 
 def check_args(mac, name, desc, expose):
@@ -250,11 +268,27 @@ def add_device(mac, name, desc, expose):
         expose_device(ip, name, desc)
 
 
-def remove_device(device_ip):
+def remove_device(device_ip, acl):
     remote_remove_device(construct_remove_device_object(device_ip))
-    # TODO do more stuff
-    pass
 
+    with open("local_capability_directory", "r") as json_file:
+        data = json.load(json_file)
+
+    cap_directory = {"capabilities": []}
+    for capability in data['capabilities']:
+        if capability['device'] == device_ip:
+            print("Removed a device/capability from the directory")
+        else:
+            cap_directory["capabilities"].append(capability)
+
+    remove_device_rule(device_ip)
+
+    if acl:
+        remove_from_acl(device_ip)
+        print("Device removed from the ACL")
+
+
+    write_directory(cap_directory)
 
 def add_capability_rules(device_ip, device_port):
     os.system("sudo iptables -A FORWARD -i tun0 -d {} -p tcp --dport {} -j ACCEPT".
@@ -263,5 +297,24 @@ def add_capability_rules(device_ip, device_port):
               format(device_ip, device_port))
 
 
+def remove_capability_rules(device_ip, device_port):
+    os.system("sudo iptables -D FORWARD -i tun0 -d {} -p tcp --dport {} -j ACCEPT".
+              format(device_ip, device_port))
+    os.system("sudo iptables -D FORWARD -i tun0 -d {} -p udp --dport {} -j ACCEPT".
+              format(device_ip, device_port))
+
+
 def add_device_rule(device_ip):
     os.system("sudo iptables -A FORWARD -i tun0 -d {} -j ACCEPT".format(device_ip))
+
+
+def remove_device_rule(device_ip):
+    os.system("sudo iptables -D FORWARD -i tun0 -d {} -j ACCEPT".format(device_ip))
+
+
+def remove_from_acl(device_ip):
+    file = open("./MAC_addresses", "r")
+    for line in file:
+        if device_ip in line:
+            mac = line.split(" ")[1]
+            os.system("sudo ./manage_acl.sh remove {}".format(mac))
