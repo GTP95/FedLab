@@ -43,7 +43,7 @@ fi
 
 # Determine if the first argument has been set correctly
 if [ "$1" = 'add' ]
-    then echo "MAC adress was added to the ACL"
+    then echo "MAC address was added to the ACL"
     IP_ADDR=`./get_random_ip.py $IP_RANGE`
     # Add mac addresses to the file
     echo "$IP_ADDR $NEW_MAC $CURRENT_TIME offline" >> $file_name
