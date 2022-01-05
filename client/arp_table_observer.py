@@ -114,13 +114,6 @@ class ArpChangeHandler(FileSystemEventHandler):
             file.write('\n'.join(map(lambda x: str(x), acl.values())) + suffix)
 
 
-
-def publish_device_update(self, mac_addr, status):
-    # use MQTT-CLI to publish the message
-    os.system(
-        "mqtt pub -h {} -t device_status_update -m '{} {}'".format(SERVER, mac_addr, status))
-
-
 def init_files_if_not_exists():
     if not os.path.exists("/tmp/arp_table"):
         open("/tmp/arp_table", 'w').close()
