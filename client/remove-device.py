@@ -14,7 +14,10 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--ip", metavar="device_ip", type=str, required=True,
                         help="The IP address of the to-be-removed device.")
 
+    parser.add_argument('-a', "--acl", dest="remove_acl", action='store_true',
+                        help="Use -a flag to remove the device from the ACL, the device will no longer be connected to the Federated Lab in any way.")
+
     args = parser.parse_args()
 
-    manage_capabilities.remove_device(args.id)
+    manage_capabilities.remove_device(args.ip, args.remove_acl)
     manage_capabilities.pretty_print_directory()  # todo: remove
