@@ -1,54 +1,68 @@
 ### CONFIGURATION PARAMETERS ###
 
-#Pick a nickname that will be showed as your party name on the FedLab directory.
+# pick a nickname that will be shown as your party name on the FedLab directory.
 PARTY_NICKNAME="<nickname>"
 
-#In the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use to connect the Gateway to WAN (probably your pre-existing LAN)
+# in the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use to connect the Gateway to WAN (probably your pre-existing LAN)
 LAB_SUBNET_ADAPTER="<YOUR_LAB_SUBNET_ADAPTER>"
 
-#In the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
+# in the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
 IP_RANGE="<YOUR-IP-RANGE>"
 
 ###PLEASE DO NOT CHANGE ANYTHING BELOW THIS LINE UNLESS EXPLICITLY INSTRUCTED TO DO SO FROM THE FEDERATED LAB ADMINISTRATOR###
 
-#Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
+# set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
 PARTY_SLUG_FROM_NETBOX="giacomo"
-#In the next line, change 192.168.5.1 to the IP you want the gateway to use.
-#WARNING: make sure the IP you choose does not interfere with any existing networks,
-#i.e. please use a subnet that is not in use.
+# in the next line, change 192.168.5.1 to the IP you want the gateway to use.
+# WARNING: make sure the IP you choose does not interfere with any existing networks,
+# i.e. please use a subnet that is not in use.
 VM_IP="192.168.42.1"
 
-#In next line, substitute "certificate.ovpn" with the name of the generated OpenVPN certificate
+# in next line, substitute "certificate.ovpn" with the name of the generated OpenVPN certificate
 CERT="certificate.ovpn"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
   config.vm.network "public_network", ip: VM_IP, bridge: LAB_SUBNET_ADAPTER
 
-  #Copy all the needed scripts inside the VM
-  config.vm.provision "file", source: "iptables.sh", destination: "~/iptables.sh"
-  config.vm.provision "file", source: "../manage_acl.sh", destination: "~/manage_acl.sh"
-  config.vm.provision "file", source: "../put_manual.sh", destination: "~/put_manual.sh"
-  config.vm.provision "file", source: "../get_manual.sh", destination: "~/get_manual.sh"
-  config.vm.provision "file", source: "../arp_table_observer.py", destination: "~/arp_table_observer.py"
-  config.vm.provision "file", source: "../init.sh", destination: "~/init.sh"
   config.vm.provision "file", source: CERT, destination: "~/#{CERT}"
-  config.vm.provision "file", source: "dhcp_conf1", destination: "~/dhcpd.conf"
-  config.vm.provision "file", source: "dhcp_conf2", destination: "~/isc-dhcp-server"
-  config.vm.provision "file", source: "../acl_persistence.py", destination: "~/acl_persistence.py"
-  config.vm.provision "file", source: "../get_random_ip.py", destination: "~/get_random_ip.py"
-  config.vm.provision "file", source: "../configure_dhcp.py", destination: "~/configure_dhcp.py"
-  config.vm.provision "file", source: "../manage_capabilities.py", destination: "~/manage_capabilities.py"
-  config.vm.provision "file", source: "../add-capability.py", destination: "~/add-capability.py"
-  config.vm.provision "file", source: "../add-device.py", destination: "~/add-device.py"
-  config.vm.provision "file", source: "../expose-device.py", destination: "~/expose-device.py"
-  config.vm.provision "file", source: "../query-directory.py", destination: "~/query-directory.py"
-  config.vm.provision "file", source: "../remove-capability.py", destination: "~/remove-capability.py"
-  config.vm.provision "file", source: "../list-capabilities.py", destination: "~/list-capabilities.py"
-  config.vm.provision "file", source: "../get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py" 
+  
+  # copy firewall scripts
+  config.vm.provision "file", source: "../system/firewall/arptables.sh", destination: "~/init.sh"
+  config.vm.provision "file", source: "../system/firewall/iptables.sh", destination: "~/iptables.sh"
+  
+  # copy configuration files and scripts needed for setup and management of the DHCP server
+  config.vm.provision "file", source: "../system/DHCP/isc-dhcp-server", destination: "~/isc-dhcp-server"
+  config.vm.provision "file", source: "../system/DHCP/dhcpd.conf", destination: "~/dhcpd.confisc-dhcp-server"
+  config.vm.provision "file", source: "../system/DHCP/get_random_ip.py", destination: "~/get_random_ip.py"
+  config.vm.provision "file", source: "../system/DHCP/configure_dhcp.py", destination: "~/configure_dhcp.py"
+  
+  # copy scripts for managements of devices and capabilities
+  config.vm.provision "file", source: "../manage-devices-capabilities/manage_acl.sh", destination: "~/manage_acl.sh"
+  config.vm.provision "file", source: "../manage-devices-capabilities/manage_capabilities.py", destination: "~/manage_capabilities.py"
+  config.vm.provision "file", source: "../manage-devices-capabilities/query-directory.py", destination: "~/query-directory.py"
+  config.vm.provision "file", source: "../manage-devices-capabilities/add-device.py", destination: "~/add-device.py"
+  config.vm.provision "file", source: "../manage-devices-capabilities/expose-device.py", destination: "~/expose-device.py"
+  config.vm.provision "file", source: "../manage-devices-capabilities/add-capability.py", destination: "~/add-capability.py"
+  config.vm.provision "file", source: "../manage-devices-capabilities/remove-device.py", destination: "~/remove-device.py"
+  config.vm.provision "file", source: "../manage-devices-capabilities/remove-capability.py", destination: "~/remove-capability.py"
+  
+  # copy scripts for sending and retrieving user manuals
+  config.vm.provision "file", source: "../user-manual-ftp-client/put_manual.sh", destination: "~/put_manual.sh"
+  config.vm.provision "file", source: "../user-manual-ftp-client/get_manual.sh", destination: "~/get_manual.sh"
+  
+  # copy files related to the sniffing capability
   config.vm.provision "file", source: "../sniff-capability/target/sniff-capability-1.0-SNAPSHOT-jar-with-dependencies.jar", destination: "~/sniff-capability.jar"
+  
+  # copy miscellaneous system files
+  config.vm.provision "file", source: "../system/acl_persistence.py", destination: "~/acl_persistence.py"
+  config.vm.provision "file", source: "../system/arp_table_observer.py", destination: "~/arp_table_observer.py"
+  config.vm.provision "file", source: "../system/get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py" 
+  
+  # TODO remove?
+  config.vm.provision "file", source: "../list-capabilities.py", destination: "~/list-capabilities.py"
 
-  #Give execution rights to manually-invoked scripts
+  # give execution rights to manually-invoked scripts
   config.vm.provision "shell", inline: "chmod +x manage_acl.sh"
   config.vm.provision "shell", inline: "chmod +x put_manual.sh"
   config.vm.provision "shell", inline: "chmod +x get_manual.sh"
@@ -62,7 +76,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "chmod +x list-capabilities.py"
   config.vm.provision "shell", inline: "chmod +x get_subnet_from_netbox.py"
 
-  #Update VM, install OpenVPN, dos2unix, python3.9, vsftpd and scripts' dependencies
+  # update VM, install OpenVPN, dos2unix, python3.9, vsftpd and scripts' dependencies
   config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
   config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip vsftpd"
   config.vm.provision "shell", inline: "sudo add-apt-repository ppa:deadsnakes/ppa"
@@ -74,7 +88,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo apt-get -y install ./mqtt-cli-4.6.2.deb"
   config.vm.provision "shell", inline: "rm mqtt-cli-4.6.2.deb"
 
-  #Fix CRLF in case host is running Windows
+  # fix CRLF in case host is running Windows
   config.vm.provision "shell", inline: "dos2unix iptables.sh"
   config.vm.provision "shell", inline: "dos2unix manage_acl.sh"
   config.vm.provision "shell", inline: "dos2unix arp_table_observer.py"
@@ -94,7 +108,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "dos2unix list-capabilities.py"
   config.vm.provision "shell", inline: "dos2unix get_subnet_from_netbox.py"
 
-  #Install DHCP server, set up configuration files, configure iptables, start DHCP service, configure vsftpd
+  # install DHCP server, set up configuration files, configure iptables, start DHCP service, configure vsftpd
   config.vm.provision "shell", inline: "sed -i '15s/192.168.5.1/#{VM_IP}/' dhcpd.conf"
   config.vm.provision "shell", inline: "sudo bash iptables.sh #{IP_RANGE}", run: 'always'
   config.vm.provision "shell", inline: "echo starting OpenVPN", run: 'always'
@@ -116,26 +130,26 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo systemctl restart vsftpd"
   config.vm.provision "shell", inline: "sudo systemctl enable vsftpd"  
 
-  #Set party nickname
+  # set party nickname
   config.vm.provision "shell", inline: "echo #{PARTY_NICKNAME} > partynickname.txt"
 
-  #enable traffic forwarding
+  # enable traffic forwarding
   config.vm.provision "shell", inline: "echo enabling traffic forwarding"
   config.vm.provision "shell", inline: "echo 1 > /proc/sys/net/ipv4/ip_forward", run: 'always'
 
-  #make sure the garbage collector for the ARP table will run with even a low number of connected devices
+  # make sure the garbage collector for the ARP table will run with even a low number of connected devices
   config.vm.provision "shell", inline: "echo 0 > /proc/sys/net/ipv4/neigh/default/gc_thresh1", run: 'always'
 
-  #make sure devices are not removed from the ARP table too soon
+  # make sure devices are not removed from the ARP table too soon
   config.vm.provision "shell", inline: "echo 600 > /proc/sys/net/ipv4/neigh/default/base_reachable_time", run: 'always'
 
-  #read out the ARP table to a temporary file, since /proc/net/arp is dynamically generated when called, hence cannot be observed
+  # read out the ARP table to a temporary file, since /proc/net/arp is dynamically generated when called, hence cannot be observed
   config.vm.provision "shell", inline: "echo \"* * * * * cat /proc/net/arp > /tmp/arp_table\" | crontab -", run: 'always'
 
-  #set up crontab
+  # set up crontab
   config.vm.provision "shell", inline: "/etc/init.d/cron restart", run: 'always'
    
-  #Start init.sh, OpenVPN, arp_table_observer.py and sniff-capability
+  # Start init.sh, OpenVPN, arp_table_observer.py and sniff-capability
   config.vm.provision "shell", inline: "echo running init.sh script", run: 'always'
   config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'
   config.vm.provision "shell", inline: "echo restoring ACL rules", run: 'always'
