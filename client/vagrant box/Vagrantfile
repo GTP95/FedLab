@@ -13,10 +13,10 @@ IP_RANGE="<YOUR-IP-RANGE>"
 
 #Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
 PARTY_SLUG_FROM_NETBOX="giacomo"
-#In the next line, change 192.168.5.1 to the IP you want the gateway to use.
+#In the next line, change <RESERVED_IP> to the IP you want the gateway to use.
 #WARNING: make sure the IP you choose does not interfere with any existing networks,
 #i.e. please use a subnet that is not in use.
-VM_IP="192.168.42.1"
+VM_IP="<RESERVED_IP>"
 
 #In next line, substitute "certificate.ovpn" with the name of the generated OpenVPN certificate
 CERT="certificate.ovpn"
