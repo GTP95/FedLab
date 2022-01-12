@@ -1,4 +1,4 @@
-### CONFIGURATION PARAMETERS ###
+### USER CONFIGURATION PARAMETERS ###
 
 #Pick a nickname that will be showed as your party name on the FedLab directory.
 PARTY_NICKNAME="<nickname>"
@@ -9,17 +9,27 @@ LAB_SUBNET_ADAPTER="<YOUR_LAB_SUBNET_ADAPTER>"
 #In the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
 IP_RANGE="<YOUR-IP-RANGE>"
 
-###PLEASE DO NOT CHANGE ANYTHING BELOW THIS LINE UNLESS EXPLICITLY INSTRUCTED TO DO SO FROM THE FEDERATED LAB ADMINISTRATOR###
-
-#Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
-PARTY_SLUG_FROM_NETBOX="giacomo"
 #In the next line, change <RESERVED_IP> to the IP you want the gateway to use.
 #WARNING: make sure the IP you choose does not interfere with any existing networks,
 #i.e. please use a subnet that is not in use.
 VM_IP="<RESERVED_IP>"
 
+
+### PLEASE DO NOT CHANGE ANYTHING BELOW THIS LINE UNLESS EXPLICITLY INSTRUCTED TO DO SO FROM THE FEDERATED LAB ADMINISTRATOR ###
+
+
+### ADMIN CONFIGURATION PARAMETERS ###
+
+#Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
+PARTY_SLUG_FROM_NETBOX=""
+
 #In next line, substitute "certificate.ovpn" with the name of the generated OpenVPN certificate
 CERT="certificate.ovpn"
+
+
+### THERE SHOULD BE NO NEED TO CHANGE ANYTHING FROM NOW ON ###
+
+### AUTOMATIC CONFIGURATION ###
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
