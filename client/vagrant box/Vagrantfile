@@ -1,4 +1,4 @@
-### CONFIGURATION PARAMETERS ###
+### USER CONFIGURATION PARAMETERS ###
 
 # pick a nickname that will be shown as your party name on the FedLab directory.
 PARTY_NICKNAME="<nickname>"
@@ -6,38 +6,49 @@ PARTY_NICKNAME="<nickname>"
 # in the next line, substitute <YOUR_LAB_SUBNET_ADAPTER> with the name of the adapter you want to use to connect the Gateway to WAN (probably your pre-existing LAN)
 LAB_SUBNET_ADAPTER="<YOUR_LAB_SUBNET_ADAPTER>"
 
-# in the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation 
+# in the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation
 IP_RANGE="<YOUR-IP-RANGE>"
 
-###PLEASE DO NOT CHANGE ANYTHING BELOW THIS LINE UNLESS EXPLICITLY INSTRUCTED TO DO SO FROM THE FEDERATED LAB ADMINISTRATOR###
+#In the next line, change <RESERVED_IP> to the IP you want the gateway to use.
+#WARNING: make sure the IP you choose does not interfere with any existing networks,
+#i.e. please use a subnet that is not in use.
+VM_IP="<RESERVED_IP>"
 
-# set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
-PARTY_SLUG_FROM_NETBOX="giacomo"
-# in the next line, change 192.168.5.1 to the IP you want the gateway to use.
-# WARNING: make sure the IP you choose does not interfere with any existing networks,
-# i.e. please use a subnet that is not in use.
-VM_IP="192.168.42.1"
+
+### PLEASE DO NOT CHANGE ANYTHING BELOW THIS LINE UNLESS EXPLICITLY INSTRUCTED TO DO SO FROM THE FEDERATED LAB ADMINISTRATOR ###
+
+
+### ADMIN CONFIGURATION PARAMETERS ###
+
+#Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
+PARTY_SLUG_FROM_NETBOX=""
 
 # in next line, substitute "certificate.ovpn" with the name of the generated OpenVPN certificate
 CERT="certificate.ovpn"
+
+
+### THERE SHOULD BE NO NEED TO CHANGE ANYTHING FROM NOW ON ###
+
+### AUTOMATIC CONFIGURATION ###
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
   config.vm.network "public_network", ip: VM_IP, bridge: LAB_SUBNET_ADAPTER
 
   config.vm.provision "file", source: CERT, destination: "~/#{CERT}"
-  
-  # copy firewall scripts
+
+  ###### COPY FILES ######
+  # firewall scripts
   config.vm.provision "file", source: "../system/firewall/arptables.sh", destination: "~/init.sh"
   config.vm.provision "file", source: "../system/firewall/iptables.sh", destination: "~/iptables.sh"
-  
-  # copy configuration files and scripts needed for setup and management of the DHCP server
+
+  # configuration files and scripts needed for setup and management of the DHCP server
   config.vm.provision "file", source: "../system/DHCP/isc-dhcp-server", destination: "~/isc-dhcp-server"
   config.vm.provision "file", source: "../system/DHCP/dhcpd.conf", destination: "~/dhcpd.confisc-dhcp-server"
   config.vm.provision "file", source: "../system/DHCP/get_random_ip.py", destination: "~/get_random_ip.py"
   config.vm.provision "file", source: "../system/DHCP/configure_dhcp.py", destination: "~/configure_dhcp.py"
-  
-  # copy scripts for managements of devices and capabilities
+
+  # scripts for managements of devices and capabilities
   config.vm.provision "file", source: "../system/firewall/manage_acl.sh", destination: "~/manage_acl.sh"
   config.vm.provision "file", source: "../system/firewall/manage_capabilities.py", destination: "~/manage_capabilities.py"
   config.vm.provision "file", source: "../manage-devices-capabilities/query-directory.py", destination: "~/query-directory.py"
@@ -46,21 +57,22 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "../manage-devices-capabilities/add-capability.py", destination: "~/add-capability.py"
   config.vm.provision "file", source: "../manage-devices-capabilities/remove-device.py", destination: "~/remove-device.py"
   config.vm.provision "file", source: "../manage-devices-capabilities/remove-capability.py", destination: "~/remove-capability.py"
-  
-  # copy scripts for sending and retrieving user manuals
+
+  # scripts for sending and retrieving user manuals
   config.vm.provision "file", source: "../user-manual-ftp-client/put_manual.sh", destination: "~/put_manual.sh"
   config.vm.provision "file", source: "../user-manual-ftp-client/get_manual.sh", destination: "~/get_manual.sh"
-  
-  # copy files related to the sniffing capability
+
+  # files related to the sniffing capability
   config.vm.provision "file", source: "../sniff-capability/target/sniff-capability-1.0-SNAPSHOT-jar-with-dependencies.jar", destination: "~/sniff-capability.jar"
-  
-  # copy miscellaneous system files
+
+  # miscellaneous system files
   config.vm.provision "file", source: "../system/acl_persistence.py", destination: "~/acl_persistence.py"
   config.vm.provision "file", source: "../system/arp_table_observer.py", destination: "~/arp_table_observer.py"
-  config.vm.provision "file", source: "../system/get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py" 
-  
+  config.vm.provision "file", source: "../system/get_subnet_from_netbox.py", destination: "~/get_subnet_from_netbox.py"
+
   # TODO remove?
   config.vm.provision "file", source: "../list-capabilities.py", destination: "~/list-capabilities.py"
+  ###### /COPY FILES ######
 
   # give execution rights to manually-invoked scripts
   config.vm.provision "shell", inline: "chmod +x manage_acl.sh"
@@ -121,14 +133,14 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo mv isc-dhcp-server /etc/default/isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo systemctl enable isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo systemctl start isc-dhcp-server"
-  config.vm.provision "shell", inline: "sudo sed -i '25s/NO/YES/' /etc/vsftpd.conf" 
+  config.vm.provision "shell", inline: "sudo sed -i '25s/NO/YES/' /etc/vsftpd.conf"
   config.vm.provision "shell", inline: "echo 'anon_root=/home/vagrant/captures' >> /etc/vsftpd.conf"
   config.vm.provision "shell", inline: "mkdir writablecaptures"
   config.vm.provision "shell", inline: "ln -s writablecaptures captures"
   config.vm.provision "shell", inline: "sudo chown ftp captures"
   config.vm.provision "shell", inline: "sudo chmod a-w captures"
   config.vm.provision "shell", inline: "sudo systemctl restart vsftpd"
-  config.vm.provision "shell", inline: "sudo systemctl enable vsftpd"  
+  config.vm.provision "shell", inline: "sudo systemctl enable vsftpd"
 
   # set party nickname
   config.vm.provision "shell", inline: "echo #{PARTY_NICKNAME} > partynickname.txt"
@@ -148,7 +160,7 @@ Vagrant.configure("2") do |config|
 
   # set up crontab
   config.vm.provision "shell", inline: "/etc/init.d/cron restart", run: 'always'
-   
+
   # Start init.sh, OpenVPN, arp_table_observer.py and sniff-capability
   config.vm.provision "shell", inline: "echo running init.sh script", run: 'always'
   config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'

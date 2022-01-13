@@ -14,7 +14,7 @@ if len(sys.argv)!=2:
 	sys.exit()
 
 partyName=sys.argv[1]
-r=requests.get('http://131.155.69.149:8000/api/ipam/ip-ranges/', headers={'Authorization': 'Token '+token, 'Accept': 'application/json; indent=4'})
+r=requests.get('http://192.168.201.9:8080/api/ipam/ip-ranges/', headers={'Authorization': 'Token '+token, 'Accept': 'application/json; indent=4'})
 for ipRange in r.json()['results']:
 	if ipRange['tenant']['slug']==partyName:
 		IP_RANGE=ipRange['start_address']
