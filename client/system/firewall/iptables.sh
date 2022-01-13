@@ -1,8 +1,14 @@
 #!/bin/bash
+
 INTERNET_ADAPTER=enp0s3
 VM_SUBNET_ADAPTER=enp0s8
 VPN_ADAPTER=tun0
 
+# Script has to be run as sudo to modify iptables
+if [ "$EUID" -ne 0 ]
+  then echo "Please run the script as root (sudo iptables.sh ...)"
+  exit
+fi
 
 iptables --flush
 iptables --delete-chain

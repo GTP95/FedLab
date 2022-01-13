@@ -18,7 +18,6 @@ def write_existing_entries():
                      + "[0-9a-fA-F]{4}\\."
                      + "[0-9a-fA-F]{4})")
 
-        # Compile the ReGex
         p = re.compile(mac_regex)
 
         mac = re.search(p, line).group()
