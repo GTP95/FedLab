@@ -9,9 +9,9 @@ LAB_SUBNET_ADAPTER="<YOUR_LAB_SUBNET_ADAPTER>"
 # in the next line, substitute <YOUR-IP-RANGE> with the IP address of your LAN in CIDR notation
 IP_RANGE="<YOUR-IP-RANGE>"
 
-#In the next line, change <RESERVED_IP> to the IP you want the gateway to use.
-#WARNING: make sure the IP you choose does not interfere with any existing networks,
-#i.e. please use a subnet that is not in use.
+# In the next line, change <RESERVED_IP> to the IP you want the gateway to use.
+# WARNING: make sure the IP you choose does not interfere with any existing networks,
+# i.e. please use a subnet that is not in use.
 VM_IP="<RESERVED_IP>"
 
 
@@ -20,7 +20,7 @@ VM_IP="<RESERVED_IP>"
 
 ### ADMIN CONFIGURATION PARAMETERS ###
 
-#Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
+# Set here the party name's slug as indicated inside NetBox. This will be used to fetch the assigned IP address block.
 PARTY_SLUG_FROM_NETBOX=""
 
 # in next line, substitute "certificate.ovpn" with the name of the generated OpenVPN certificate
@@ -88,9 +88,9 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "chmod +x list-capabilities.py"
   config.vm.provision "shell", inline: "chmod +x get_subnet_from_netbox.py"
 
-  # update VM, install OpenVPN, dos2unix, python3.9, vsftpd and scripts' dependencies
+  # update VM, install OpenVPN, dos2unix, python3.9, vsftpd, isc-dhcp-server and scripts' dependencies
   config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
-  config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip vsftpd"
+  config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip vsftpd isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo add-apt-repository ppa:deadsnakes/ppa"
   config.vm.provision "shell", inline: "sudo apt-get -y install python3.9"
   config.vm.provision "shell", inline: "python3.9 -m pip install watchdog"
@@ -117,14 +117,13 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "dos2unix list-capabilities.py"
   config.vm.provision "shell", inline: "dos2unix get_subnet_from_netbox.py"
 
-  # install DHCP server, set up configuration files, configure iptables, start DHCP service, configure vsftpd
+  # set up configuration files, configure iptables, start DHCP service, configure vsftpd
   config.vm.provision "shell", inline: "sed -i '15s/192.168.5.1/#{VM_IP}/' dhcpd.conf"
   config.vm.provision "shell", inline: "sudo bash iptables.sh #{IP_RANGE}", run: 'always'
   config.vm.provision "shell", inline: "echo starting OpenVPN", run: 'always'
   config.vm.provision "shell", inline: "sudo openvpn --config #{CERT} &", run: 'always'
   config.vm.provision "shell", inline: "echo getting IP address block from NetBox and using it to configure the DHCP server", run:'always'
   config.vm.provision "shell", inline: "python3.9 get_subnet_from_netbox.py #{PARTY_SLUG_FROM_NETBOX}"
-  config.vm.provision "shell", inline: "sudo apt-get -y install isc-dhcp-server"
   config.vm.provision "shell", inline: "sudo mv dhcpd.conf /etc/dhcp/dhcpd.conf"
   config.vm.provision "shell", inline: "sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd_base.conf"
   config.vm.provision "shell", inline: "sudo mv isc-dhcp-server /etc/default/isc-dhcp-server"
@@ -158,7 +157,7 @@ Vagrant.configure("2") do |config|
   # set up crontab
   config.vm.provision "shell", inline: "/etc/init.d/cron restart", run: 'always'
 
-  # Start init.sh, OpenVPN, arp_table_observer.py and sniff-capability
+  # start init.sh, OpenVPN, arp_table_observer.py and sniff-capability
   config.vm.provision "shell", inline: "echo running init.sh script", run: 'always'
   config.vm.provision "shell", inline: "sudo bash init.sh", run: 'always'
   config.vm.provision "shell", inline: "echo restoring ACL rules", run: 'always'
