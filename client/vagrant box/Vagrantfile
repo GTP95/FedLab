@@ -96,9 +96,6 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "python3.9 -m pip install watchdog"
   config.vm.provision "shell", inline: "python3.9 -m pip install paho-mqtt"
   config.vm.provision "shell", inline: "python3.9 -m pip install requests"
-  config.vm.provision "shell", inline: "wget https://github.com/hivemq/mqtt-cli/releases/download/v4.6.2/mqtt-cli-4.6.2.deb"
-  config.vm.provision "shell", inline: "sudo apt-get -y install ./mqtt-cli-4.6.2.deb"
-  config.vm.provision "shell", inline: "rm mqtt-cli-4.6.2.deb"
 
   # fix CRLF in case host is running Windows
   config.vm.provision "shell", inline: "dos2unix iptables.sh"
