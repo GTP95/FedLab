@@ -86,6 +86,10 @@ class ArpChangeHandler(FileSystemEventHandler):
                     print("Error: {}".format(e))
                     return
 
+        # keep track of which entries to remove
+        # (Python does not like removing dictionary entries while iterating over keys of the dictionary)
+        to_be_removed = []
+
         # determine whether entries in 'MAC_addresses' are to be refreshed or removed
         for mac_addr in acl.keys():
             # If a registered MAC address was found in the ARP table, update its time.
@@ -99,8 +103,8 @@ class ArpChangeHandler(FileSystemEventHandler):
             # If a registered MAC address was not found in the ARP table and
             # has not been connected for at least TTL seconds, remove it from the list.
             elif acl[mac_addr].last_used + TTL < current_time:
-                manage_capabilities.remove_device(acl[mac_addr].ip)
-                del acl[mac_addr]
+                manage_capabilities.remove_device(acl[mac_addr].ip, False)
+                to_be_removed.append(mac_addr)
 
             # MAC address was not in found in the ARP table, but has not yet expired
             # If the device was online before, an update will be sent to the server.
@@ -109,6 +113,11 @@ class ArpChangeHandler(FileSystemEventHandler):
                     acl[mac_addr].status = "offline"
                     manage_capabilities.post_status_update(acl[mac_addr].ip, False)
 
+        # remove the expired entries
+        for mac_addr in to_be_removed:
+            del acl[mac_addr]
+
+        # overwrite with updated ACL entries
         suffix = '\n' if len(acl) > 0 else ''
         with open("MAC_addresses", 'w') as file:
             file.write('\n'.join(map(lambda x: str(x), acl.values())) + suffix)
