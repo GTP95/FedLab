@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
 
   # configuration files and scripts needed for setup and management of the DHCP server
   config.vm.provision "file", source: "../system/DHCP/isc-dhcp-server", destination: "~/isc-dhcp-server"
-  config.vm.provision "file", source: "../system/DHCP/dhcpd.conf", destination: "~/dhcpd.confisc-dhcp-server"
+  config.vm.provision "file", source: "../system/DHCP/dhcpd.conf", destination: "~/dhcpd.conf"
   config.vm.provision "file", source: "../system/DHCP/get_random_ip.py", destination: "~/get_random_ip.py"
   config.vm.provision "file", source: "../system/DHCP/configure_dhcp.py", destination: "~/configure_dhcp.py"
 
