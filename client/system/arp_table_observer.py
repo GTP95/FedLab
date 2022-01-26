@@ -103,7 +103,7 @@ class ArpChangeHandler(FileSystemEventHandler):
             # If a registered MAC address was not found in the ARP table and
             # has not been connected for at least TTL seconds, remove it from the list.
             elif acl[mac_addr].last_used + TTL < current_time:
-                manage_capabilities.remove_device(acl[mac_addr].ip, False)
+                manage_capabilities.remove_device(acl[mac_addr].ip, True)
                 to_be_removed.append(mac_addr)
 
             # MAC address was not in found in the ARP table, but has not yet expired
