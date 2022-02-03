@@ -90,7 +90,7 @@ Vagrant.configure("2") do |config|
 
   # update VM, install OpenVPN, dos2unix, python3.9, vsftpd, isc-dhcp-server and scripts' dependencies
   config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get -y autoremove"
-  config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip vsftpd isc-dhcp-server"
+  config.vm.provision "shell", inline: "sudo apt-get -y install openvpn dos2unix python3-pip vsftpd isc-dhcp-server openjdk-11-jre"
   config.vm.provision "shell", inline: "sudo apt-get -y install python3.9"
   config.vm.provision "shell", inline: "python3.9 -m pip install watchdog"
   config.vm.provision "shell", inline: "python3.9 -m pip install paho-mqtt"
