@@ -4,6 +4,8 @@ import re
 import subprocess
 
 
+# Grabs the entries of the file 'MAC_addresses',
+# and adds each entry to the DHCP allow-list
 def write_existing_entries():
     with open('MAC_addresses', 'r') as f:
         lines = f.readlines()
