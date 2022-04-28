@@ -96,7 +96,7 @@ class ArpChangeHandler(FileSystemEventHandler):
             # If the device was offline before, an update will be sent to the server.
             if acl[mac_addr].mac_addr in arp_table_mac_list:
                 acl[mac_addr].last_used = current_time
-                if entry.status == "offline":
+                if acl[mac_addr].status == "offline":
                     acl[mac_addr].status = "online"
                     manage_capabilities.post_status_update(acl[mac_addr].ip, True)
 
