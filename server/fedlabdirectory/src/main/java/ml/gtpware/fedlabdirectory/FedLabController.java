@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.springframework.web.util.HtmlUtils.htmlEscape;
 
 @RestController
 public class FedLabController {

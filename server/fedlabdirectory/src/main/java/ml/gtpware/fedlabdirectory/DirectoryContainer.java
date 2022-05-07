@@ -1,5 +1,7 @@
 package ml.gtpware.fedlabdirectory;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -36,7 +38,7 @@ public class DirectoryContainer {
         capabilities.get(capabilities.size()-1).add(capability);
     }
 
-    public synchronized void addDevice(Capability device){
+    public synchronized void addDevice(@NotNull Capability device){
         if(devices.isEmpty()){
             devices.add(new ArrayList<Capability>());
             devices.get(0).add(device);
@@ -181,7 +183,7 @@ public class DirectoryContainer {
         return devices;
     }
 
-    public synchronized void statusUpdate(StatusUpdate statusUpdate){    //updates the online status of a capability or device
+    public synchronized void statusUpdate(@NotNull StatusUpdate statusUpdate){    //updates the online status of a capability or device
         for(Object arrayList : capabilities){
             for (Capability capability : (ArrayList<Capability>)arrayList){
                 if(capability.ip.equals(statusUpdate.ip)){
@@ -201,7 +203,7 @@ public class DirectoryContainer {
         }
     }
 
-    public synchronized void removeDevice(RemoveRequest request){
+    public synchronized void removeDevice(@NotNull RemoveRequest request){
         outer: for(Object arraylist : devices){    //First, find and remove the device
             for(Capability device : (ArrayList<Capability>)arraylist){
                 if(device.ip.equals(request.identifier)){
@@ -221,11 +223,11 @@ public class DirectoryContainer {
         }
     }
 
-    public synchronized void removeCapability(RemoveRequest request){
-        for(Object arraylist : devices){
-            for(Capability capability : (ArrayList<Capability>)arraylist){
+    public synchronized void removeCapability(@NotNull RemoveRequest request){
+        for(ArrayList<Capability> arraylist : capabilities){
+            for(Capability capability : arraylist){
                 if(capability.uuid.equals(request.identifier)){
-                    ((ArrayList<Capability>) arraylist).remove(capability); //Again assuming no duplicates TODO: prevent duplicates
+                    arraylist.remove(capability); //Again assuming no duplicates TODO: prevent duplicates
                     return;
                 }
             }
