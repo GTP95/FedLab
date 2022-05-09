@@ -184,20 +184,19 @@ public class DirectoryContainer {
     }
 
     public synchronized void statusUpdate(@NotNull StatusUpdate statusUpdate){    //updates the online status of a capability or device
-        for(Object arrayList : capabilities){
-            for (Capability capability : (ArrayList<Capability>)arrayList){
-                if(capability.ip.equals(statusUpdate.ip)){
-                    capability.isOnline=statusUpdate.isOnline;
-                    return;
+        for(ArrayList<Capability> arrayList : capabilities){
+                for (Capability capability : arrayList){ //There can be multiple capabilities per IP, so we need to check all of them
+                    if(capability.ip.equals(statusUpdate.ip)){
+                        capability.isOnline=statusUpdate.isOnline;
+                    }
                 }
-            }
         }
 
-        for(Object arrayList : devices){
-            for (Capability device : (ArrayList<Capability>)arrayList){
+        for(ArrayList<Capability> arrayList : devices){
+            for (Capability device : arrayList){
                 if(device.ip.equals(statusUpdate.ip)){
                     device.isOnline=statusUpdate.isOnline;
-                    return;
+                    return; //there is only one device per IP, so we can return here.
                 }
             }
         }
