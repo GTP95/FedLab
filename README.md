@@ -1,4 +1,4 @@
-# seminar-intersct-project
+# FedLab
 
 ## Deploy gateway (client)
 1. Clone this repo.
