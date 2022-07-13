@@ -1,25 +1,76 @@
 # FedLab
 
-## Deploy gateway (client)
-1. Clone this repo.
-2. Put your OpenVPN configuration file/certificate inside the "vagrant box" directory.
-3. cd inside the "vagrant box" directory.
-4. Edit line 6 of the file "Vagrantfile" to set an IP address for the VM, which will be used as the lab subnet router. See comment inside the file.
-5. Edit line 9 of the file "Vagrantfile" to set the IP range of your LAN in CIDR notation. See comment inside the file. Note: this is not the gateway subnet, but your own LAN.
-6. Edit lines 12 and 15 of the file "Vagrantfile" to set the IP range of your subnet. This has to correspond with VM_IP. See comment inside the file.
-7. Edit lines 19 and 20 of the file "Vagrantfile" to define the range in which the DHCP server of the gateway will distribute IP addresses. See comment inside the file.
-8. Edit line 23 of the file "Vagrantfile" to set the network adapter you want to use for the lab subnet.
-9. Edit line 26 of the file "Vagrantfile" to reflect the name of your OpenVPN config/certificate file. See comment inside the file.
-10. Run `vagrant up`.
+## Deploy the server (quick instructions)
+1. Install Docker
+2. Install docker-compose
+3. Clone this repo
+4. Initialize the configuration files and certificates for OpenVPN. Substitute `VPN.SERVERNAME.COM` with the static IP or URL of your server:
+```BASH
+docker-compose run --rm openvpn ovpn_genconfig -u udp://VPN.SERVERNAME.COM -p "route 192.168.201.0 255.255.255.0"
+docker-compose run --rm openvpn ovpn_initpki
+```
+5. Start OpenVPN, Federated Lab Directory, and FTP server containers:
+```BASH
+docker-compose up -d
+```
+6. Clone the netbox-docker GitHub repository and cd into the directory that contains the repo:
+```BASH
+git clone -b release https://github.com/netbox-community/netbox-docker.git
+cd netbox-docker
+```
+7. Create a new file called `docker-compose.override.yml` and paste inside the following:
+```YAML
+version: '3.4'
+services:
+  netbox:
+    ports:
+      - 8080
+    networks:
+      server_intersect_docker_network:
+        ipv4_address: 192.168.201.9
 
-In order to connect multiple devices to the gateway, a switch or router in AP mode (with no NAT/DHCP) is supposed to be connected to the network adapter you chose in step 8.
+  netbox-worker:
+    networks:
+      - server_intersect_docker_network
 
-Before applying any of the following operations, run `vagrant ssh` from the `vagrant box` directory to get a shell for the client. `$MAC_ADDR` represents the MAC address of the device you want to add to the ACL.
+  netbox-housekeeping:
+    networks:
+      - server_intersect_docker_network
 
-- **Add a device to the ACL**
+  postgres:
+    networks:
+      - server_intersect_docker_network
 
-    `sudo ./manage_acl.sh add $MAC_ADDR`
+  redis:
+    networks:
+      - server_intersect_docker_network
 
-- **Remove a device from the ACL**
+  redis-cache:
+    networks:
+      - server_intersect_docker_network
 
-    `sudo ./manage_acl.sh remove $MAC_ADDR`
+
+networks:
+  server_intersect_docker_network:
+    external: true
+```
+8. run `docker-compose pull`
+9. Run `docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d`
+
+For more detailed instructions on how to deploy the server and how to operate it, refer to the server manual.
+
+## Deploy Bundle Box (client, quick instructions)
+1. Uncompress the archive containing the Bundle Box in a convenient location on your system.
+2. Navigate to that location, enter the `Vagrant Box` directory and open the file `Vagrantfile`.
+3. On line 4 of the Vagrantfile, substitute `nickname` with a nickname you wish to appear on the Federated Lab Directory as your party name
+4. On line 7 of the Vagrantfile, substitute `<YOUR_LAB_SUBNET_ADAPTER>` with the name of the network interface you are using to connect your computer to WAN as it is called by the OS (i.e. the one you use to connect to internet, e.g. enp2s0 on a Linux system).
+5. On line 10 of the Vagrantfile, substitute `<YOUR-IP-RANGE>` with the IP address of your LAN in CIDR notation, e.g. 192.168.0.0/24.
+6. On line 19 of the Vagrantfile, substitute `<RESERVED_IP>` with the IP address you reserved on your LAN for the Bundle Box.
+7. Run the command
+```BASH
+    vagrant up
+```
+to provision and start the Bundle Box.
+    
+For more deatiled instructions and for a description of how to operate a Bundle Box, refer to the user manual.
+
